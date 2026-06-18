@@ -1,5 +1,7 @@
-from constants import PROJECT_NAME,SERVICES,LOGGER_PATH
+from cloudguard.constants import PROJECT_NAME,SERVICES,LOGGER_PATH
 from cloudguard.utils.logger import write_log
+from cloudguard.utils.config_loader import load_config
+
 def start_scan():
     
     print("=================================")
@@ -11,7 +13,18 @@ def start_scan():
         
 
 def setup_logger():
-    message='CloudGuard Started'
+    config=load_config()
+    running_tasks=[]
+    skiiped_tasks=[]
+    for scan_type,is_enabled in config.items():
+        if is_enabled:
+            print(f'Running Tasks: {scan_type}')
+            running_tasks.append(scan_type)
+        else:
+            print(f'Skipped  Tasks: {scan_type}')
+            skiiped_tasks.append(scan_type)
+            
+    message=f'CloudGuard Started\nRunning:{running_tasks}\nskipped:{skiiped_tasks}'
     
     write_log(message)
 

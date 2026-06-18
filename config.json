@@ -1,0 +1,5 @@
+{
+    "scan_s3": true,
+    "scan_iam": true,
+    "scan_vpc": false
+}

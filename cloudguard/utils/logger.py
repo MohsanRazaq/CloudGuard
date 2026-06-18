@@ -1,11 +1,14 @@
 from datetime import datetime
-from constants import LOGGER_PATH
 import os
-def write_log(message:str)->None:
-    TIMESTAMP=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    msg=(f"[{TIMESTAMP}] {message}")
-    os.makedirs(LOGGER_PATH,exist_ok=True)
-    print(msg)
-    with open(f'{LOGGER_PATH}/cloudguard.log','a') as f:
-        f.write(msg+"\n\n")
-    
+from cloudguard.constants import LOGGER_PATH
+
+
+def write_log(message: str) -> None:
+
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    os.makedirs(LOGGER_PATH, exist_ok=True)
+
+    with open(f"{LOGGER_PATH}/cloudguard.log", "a") as f:
+        f.write(f"[{timestamp}] {message}\n")
+        
