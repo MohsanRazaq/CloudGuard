@@ -1,7 +1,5 @@
-from constants import PROJECT_NAME,SERVICES
-
-
-
+from constants import PROJECT_NAME,SERVICES,LOGGER_PATH
+from cloudguard.utils.logger import write_log
 def start_scan():
     
     print("=================================")
@@ -10,5 +8,17 @@ def start_scan():
     print(PROJECT_NAME)
     for service in SERVICES:
         print(f'Future Scanner: {service}')
+        
 
-start_scan()
+def setup_logger():
+    message='CloudGuard Started'
+    
+    write_log(message)
+
+
+
+
+if __name__=="__main__":
+    setup_logger()    
+    start_scan()
+

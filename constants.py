@@ -1,2 +1,3 @@
 PROJECT_NAME='CloudGuard'
 SERVICES=['S3','IAM','VPC']
+LOGGER_PATH='logs'
