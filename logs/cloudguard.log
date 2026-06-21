@@ -1,22 +1,38 @@
+[2026-06-22 00:59:22] 
+===== CloudGuard Scan Started =====
+Running Tasks : scan_s3, scan_iam
+Skipped Tasks : scan_vpc
+===================================
 
-[2026-06-18 22:13:56] cloudguard Started..
+[2026-06-22 01:00:39] 
+===== CloudGuard Scan Started =====
+Running Tasks : scan_s3, scan_iam
+Skipped Tasks : scan_vpc
+===================================
 
-[2026-06-18 22:15:36] CloudGuard Started
+[2026-06-22 01:00:39] === S3 Discovery ===
+[2026-06-22 01:00:39] [DISCOVERED] cloudguard-test
+[2026-06-22 01:00:39] [Medium] cloudguard-test: Bucket Versioning Disabled
 
-[2026-06-18 22:19:07] CloudGuard Started
+[2026-06-22 01:01:06] 
+===== CloudGuard Scan Started =====
+Running Tasks : scan_s3, scan_iam
+Skipped Tasks : scan_vpc
+===================================
 
-[2026-06-18 22:35:25] CloudGuard Started
-[2026-06-18 22:35:36] CloudGuard Started
-[2026-06-18 22:41:31] CloudGuard Started
-Running Services
-{'scan_s3': True, 'scan_iam': True, 'scan_vpc': True}
-[2026-06-18 22:52:11] CloudGuard Started
-['scan_s3', 'scan_iam', 'scan_vpc']
-[]
-[2026-06-18 22:53:16] CloudGuard Started
-Running:['scan_s3', 'scan_iam', 'scan_vpc']
-skipped[]
+[2026-06-22 01:01:06] 
+=== S3 Discovery ===
+[2026-06-22 01:01:06] [DISCOVERED] cloudguard-test
+[2026-06-22 01:01:06] [Medium] cloudguard-test: Bucket Versioning Disabled
 
-[2026-06-18 22:53:42] CloudGuard Started
-Running:['scan_s3', 'scan_iam']
-skipped:['scan_vpc']
+
+[2026-06-22 01:04:58] 
+============================================================
+CloudGuard Scan Started
+Running Tasks : scan_s3, scan_iam
+Skipped Tasks : scan_vpc
+============================================================
+[2026-06-22 01:04:58] 
+=== S3 Discovery ===
+[2026-06-22 01:04:58] [DISCOVERED] cloudguard-test
+[2026-06-22 01:04:58] [Medium] cloudguard-test: Bucket Versioning Disabled
