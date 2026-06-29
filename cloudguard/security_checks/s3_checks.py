@@ -1,9 +1,10 @@
 from cloudguard.aws.session import create_session
 from cloudguard.findings import Finding
-
+session = create_session()
+s3 = session.client("s3")
 
 def check_bucket_versioning(bucket_name):
-    s3 = create_session()
+    
 
     try:
         response = s3.get_bucket_versioning(
