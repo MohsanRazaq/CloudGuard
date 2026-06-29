@@ -30,15 +30,15 @@ def setup_logger()->None:
             running_tasks.append(scan_type)
         else:
             skipped_tasks.append(scan_type)
-    message = (f
+    message = (
     "\n"
     +" " * 25 
     +"CLOUD GUARD\n"
-    + {SEPARATOR}
+    + SEPARATOR
     + "\n"
     + f"Running Tasks : {', '.join(running_tasks)}\n"
     + f"Skipped Tasks : {', '.join(skipped_tasks)}\n"
-    + {SEPARATOR}
+    + SEPARATOR
 )   
     feeder(message)
 
