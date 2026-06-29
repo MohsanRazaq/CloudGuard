@@ -15,7 +15,9 @@ def check_bucket_versioning(bucket_name):
 
         if status != "Enabled":
             return Finding(
+                check="versioning",
                 resource=bucket_name,
+                passed=False,
                 severity="Medium",
                 issue="Bucket Versioning Disabled",
                 recommendation="Enable S3 Versioning"
@@ -26,3 +28,4 @@ def check_bucket_versioning(bucket_name):
     except Exception as e:
         print(e)
         return None
+    

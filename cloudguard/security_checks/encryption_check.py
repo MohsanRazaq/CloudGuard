@@ -18,7 +18,9 @@ def check_bucket_encryption(bucket_name):
         if e.response["Error"]["Code"] == \
             "ServerSideEncryptionConfigurationNotFoundError":
             return Finding(
+            check="Encryption",
             resource=bucket_name,
+            passed=True,
             severity="High",
             issue="Bucket Encryption Disabled",
             recommendation="Enable Encryption")

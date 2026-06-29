@@ -2,9 +2,7 @@ from datetime import datetime
 import os
 from cloudguard.constants import LOGGER_PATH
 
-
 def write_log(message: str) -> None:
-
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     os.makedirs(LOGGER_PATH, exist_ok=True)
