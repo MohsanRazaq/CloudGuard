@@ -7,12 +7,15 @@ from cloudguard.security_checks.s3_checks import (
 from cloudguard.constants import SEPARATOR
 from cloudguard.security_checks.encryption_check import check_bucket_encryption
 from cloudguard.security_checks.public_access_check import check_bucket_acl
+from cloudguard.security_checks.public_block_check import check_public_access_block
+
 
 ################################################################################
 S3_SECURITY_CHECKS = [
     check_bucket_versioning,
     check_bucket_encryption,
-    check_bucket_acl
+    check_bucket_acl,
+    check_public_access_block
 ]
 
 
