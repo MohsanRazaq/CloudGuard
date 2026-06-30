@@ -2,17 +2,15 @@
 .venv/
 venv/
 
-# Python cache
+logs/*.log
+
+.vscode/
+
+.notes/
+
 __pycache__/
 *.py[cod]
 
-# Logs
-logs/*.log
-
-# VS Code
 .vscode/
 
-# macOS
-.DS_Store
-
-.notes/
+.env
