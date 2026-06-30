@@ -9,9 +9,9 @@ class Finding:
 
     def __str__(self):
         if self.passed:
-            return f"  ↳ [PASS] {self.check}: Secure and compliant"
+            return f"↳ [PASS] {self.check}: Secure and compliant"
 
         return (
-            f"  ↳ [{self.severity}] {self.check}: {self.issue}\n"
+            f"↳ [{self.severity}] {self.check}: {self.issue}\n"
             f"  FIX-> {self.recommendation}"
         )

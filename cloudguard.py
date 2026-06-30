@@ -9,14 +9,14 @@ from cloudguard.security_checks.encryption_check import check_bucket_encryption
 from cloudguard.security_checks.public_access_check import check_bucket_acl
 
 ################################################################################
-S3_CHECKS = [
+S3_SECURITY_CHECKS = [
     check_bucket_versioning,
     check_bucket_encryption,
     check_bucket_acl
 ]
 
 
-def feeder(message) -> None:
+def feeder(message:object) -> None:
     text = str(message)
     print(text)
     write_log(text)
@@ -50,27 +50,16 @@ def scan_s3_buckets() -> None:
     feeder(SEPARATOR)
     
     for bucket in list_buckets():
-        # 1. Print the header for the resource being evaluated
         feeder(f"\n[RESOURCE] {bucket}")
         
-        has_issues = False
+        results = [
+        check(bucket)
+        for check in S3_SECURITY_CHECKS
+]
 
-        for check in S3_CHECKS:
-            result = check(bucket)
-
-            if result:
-                # 2. If an issue is found, print the formatted finding with an indent
-                feeder(result)
-                has_issues = True
-            else:
-                # 3. If result is None, explicitly report that the specific check passed!
-                # We extract the check name by converting the function name cleanly
-                check_name = check.__name__.replace('check_bucket_', '').title()
-                feeder(f"  ↳ [PASS] {check_name}: Secure and compliant")
+        for result in results:
+            feeder(result)
         
-        # 4. Print a clean status summary line for this specific bucket
-        if not has_issues:
-            feeder(f"   Status: All checks passed for {bucket}")
             
     feeder("\n" + SEPARATOR)
     feeder(" SCAN COMPLETE")
