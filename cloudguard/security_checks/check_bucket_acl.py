@@ -33,15 +33,15 @@ def check_bucket_acl(bucket_name,s3_client):
                     recommendation='Disable ACLs entirely by enabling S3 Object Ownership (Bucket owner enforced)'   
                 )
                 
-            return Finding(
-                    check='Bucket ACL',
-                    resource=bucket_name,
-                    passed=True,
-                    severity=None,
-                    issue=f'ACL secure. only owner has access',
-                    recommendation='No Action required'   
-                )
-        
+        return Finding(
+                check='Bucket ACL',
+                resource=bucket_name,
+                passed=True,
+                severity=None,
+                issue=f'ACL secure. only owner has access',
+                recommendation='No Action required'   
+            )
+    
     except Exception as e:
         return Finding(
                     check='ACL Review',

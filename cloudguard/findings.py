@@ -24,21 +24,32 @@ class Finding:
             pass_badge = f"{COLORS['GREEN']}[PASS]{COLORS['RESET']}"
             return f"  ↳ {pass_badge} {self.check}: Secure and compliant"
         
-        if self.severity == 'HIGH':
+        sev_val = str(self.severity).upper()
+        if sev_val == 'HIGH':
             sev_badge = f"{COLORS['RED']}[High]{COLORS['RESET']}"
-        elif self.severity == 'MEDIUM':
-            sev_badge = f"{COLORS['YELLOW']} Medium{COLORS['RESET']}"
-            
+        elif sev_val == 'MEDIUM':
+            sev_badge = f"{COLORS['YELLOW']}[Medium]{COLORS['RESET']}"
         else:
             sev_badge = f"[{self.severity}]"
 
-        
         fix_pointer = f"{COLORS['CYAN']}FIX:{COLORS['RESET']}"
         issue_pointer = f"{COLORS['CYAN']}ISSUE:{COLORS['RESET']}"
         
         return (
-            f"  ↳ {sev_badge} {COLORS['BOLD']}{self.check}{COLORS['RESET']}"
-            f"\n           {issue_pointer} {self.issue}\n"
-            f"            {fix_pointer} {self.recommendation}"
+            f"  ↳ {sev_badge} {COLORS['BOLD']}{self.check}{COLORS['RESET']}\n"
+            f"      {issue_pointer} {self.issue}\n"
+            f"      {fix_pointer} {self.recommendation}"
         )
 
+    def __repr__(self):
+        return self.__str__()
+
+    def to_dict(self):
+        return {
+            "check": self.check,
+            "resource": self.resource,
+            "passed": self.passed,
+            "severity": self.severity if not self.passed else "None",
+            "issue": self.issue if not self.passed else "Secure and compliant",
+            "recommendation": self.recommendation if not self.passed else "No action required"
+        }
