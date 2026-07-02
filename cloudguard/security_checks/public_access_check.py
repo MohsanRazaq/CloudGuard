@@ -1,13 +1,10 @@
-from cloudguard.aws.session import create_session
 from cloudguard.findings import Finding
 from botocore.exceptions import ClientError
 from cloudguard.constants import ALL_USERS_URI,AUTH_USERS_URI
-session = create_session()
-s3 = session.client('s3')
 
-def check_bucket_acl(bucket_name):
+def check_bucket_acl(bucket_name:str,s3_client):
     try:
-        response = s3.get_bucket_acl(Bucket=bucket_name)
+        response = s3_client.get_bucket_acl(Bucket=bucket_name)
         grants = response['Grants']
         
         for grant in grants:

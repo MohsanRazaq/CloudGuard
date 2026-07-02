@@ -18,3 +18,8 @@ logs/
 
 # Personal Notes
 .notes/
+.prog_test
+.pytest_cache/
+.coverage
+.pytest_cache
+.mypy_cache/

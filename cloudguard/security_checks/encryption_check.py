@@ -1,14 +1,11 @@
 
-from cloudguard.aws.session import create_session
 from cloudguard.findings import Finding
 
 from botocore.exceptions import ClientError
-session=create_session()
-s3 =session.client('s3') 
 
-def check_bucket_encryption(bucket_name):
+def check_bucket_encryption(bucket_name:str,s3_client)->object:
     try:
-        s3.get_bucket_encryption(Bucket=bucket_name)
+        s3_client.get_bucket_encryption(Bucket=bucket_name)
 
         return Finding(
             check="Encryption",

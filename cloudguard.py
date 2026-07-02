@@ -4,10 +4,12 @@ from cloudguard.aws.s3_scanner import list_buckets
 from cloudguard.security_checks.s3_checks import (
     check_bucket_versioning
 )
+from cloudguard.aws.session import create_session
 from cloudguard.constants import SEPARATOR
 from cloudguard.security_checks.encryption_check import check_bucket_encryption
 from cloudguard.security_checks.public_access_check import check_bucket_acl
 from cloudguard.security_checks.public_block_check import check_public_access_block
+from cloudguard.security_checks.check_bucket_logging import Get_Bucket_Logging
 
 
 ################################################################################
@@ -15,7 +17,8 @@ S3_SECURITY_CHECKS = [
     check_bucket_versioning,
     check_bucket_encryption,
     check_bucket_acl,
-    check_public_access_block
+    check_public_access_block,
+    Get_Bucket_Logging
 ]
 
 
@@ -51,12 +54,13 @@ def scan_s3_buckets() -> None:
     feeder("\n" + SEPARATOR)
     feeder(" S3 SECURITY ASSESSMENT")
     feeder(SEPARATOR)
-    
-    for bucket in list_buckets():
+    session = create_session()
+    s3_client = session.client('s3')
+    for bucket in list_buckets(s3_client):
         feeder(f"\n[RESOURCE] {bucket}")
         
         results = [
-        check(bucket)
+        check(bucket,s3_client)
         for check in S3_SECURITY_CHECKS
 ]
 

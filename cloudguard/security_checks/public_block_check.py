@@ -1,14 +1,10 @@
-from cloudguard.aws.session import create_session
 from cloudguard.findings import Finding
 from botocore.exceptions import ClientError
 
-session = create_session()
-s3 = session.client('s3')
 
-
-def check_public_access_block(bucket_name):
+def check_public_access_block(bucket_name:str,s3_client):
     try:
-        response=s3.get_public_access_block(Bucket=bucket_name)
+        response=s3_client.get_public_access_block(Bucket=bucket_name)
         PAB_config=response['PublicAccessBlockConfiguration']
         
         block_acls=PAB_config.get('BlockPublicAcls',False)
@@ -31,17 +27,18 @@ def check_public_access_block(bucket_name):
                 resource=bucket_name,
                 passed=True,
                 severity='',
-                issue='',
-                recommendation='public Access Block Setting is ALready configured'     
+                issue='Bucket logging is configured correctly.',
+                recommendation='No action required'     
             )
         
     except ClientError as e:
         error_code = e.response['Error']['Code']
-        if error_code=='NoSuchPublicAccessBlockConfiguration':
-            return  Finding(
+        if e.response['Error']['Code'] == 'NoSuchPublicAccessBlockConfiguration':
+            return Finding(
                 check='Public Access Block',
                 resource=bucket_name,
                 passed=False,
                 severity='High',
-                issue='Public Access block Configuration Does not exist',
-                recommendation="Create and enable all 4 Public Access Block options")
+                issue='Public Access block configuration is entirely missing.',
+                recommendation='Deploy standard AWS Public Access Block controls.'
+            )
