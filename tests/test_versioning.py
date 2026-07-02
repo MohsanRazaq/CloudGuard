@@ -1,5 +1,5 @@
 from cloudguard.aws.s3_scanner import list_buckets
-from cloudguard.security_checks.s3_checks import (
+from cloudguard.security_checks.check_bucket_versioning import (
     check_bucket_versioning
 )
 
