@@ -16,7 +16,7 @@ from cloudguard.security_checks.check_bucket_logging import check_bucket_logging
 from cloudguard.security_checks.check_bucket_acl import check_bucket_acl
 
 
-################################################################################
+
 S3_SECURITY_CHECKS = [
     check_bucket_versioning,
     check_bucket_encryption,
@@ -100,6 +100,7 @@ def export_to_json(all_findings,running_tasks):
     report_filename="cloudguard_report.json"
     with open (report_filename,'w') as json_file:
         json.dump(json_payload,json_file,indent=4)
+        
         
     feeder(f"\n{COLORS['GREEN']}JSON report exported successfully to {report_filename}!{COLORS['RESET']}")
 def main():
