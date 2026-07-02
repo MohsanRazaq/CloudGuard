@@ -1,24 +1,26 @@
 from cloudguard.utils.config_loader import load_config
 from cloudguard.utils.logger import write_log
 from cloudguard.aws.s3_scanner import list_buckets
-from cloudguard.security_checks.s3_checks import (
+from cloudguard.reporting.summary import print_summary
+from cloudguard.security_checks.check_bucket_versioning import (
     check_bucket_versioning
 )
+from cloudguard.findings import COLORS
 from cloudguard.aws.session import create_session
 from cloudguard.constants import SEPARATOR
-from cloudguard.security_checks.encryption_check import check_bucket_encryption
-from cloudguard.security_checks.public_access_check import check_bucket_acl
-from cloudguard.security_checks.public_block_check import check_public_access_block
-from cloudguard.security_checks.check_bucket_logging import Get_Bucket_Logging
+from cloudguard.security_checks.check_bucket_encryption import check_bucket_encryption
+from cloudguard.security_checks.check_bucket_public_block import check_public_access_block
+from cloudguard.security_checks.check_bucket_logging import check_bucket_logging
+from cloudguard.security_checks.check_bucket_acl import check_bucket_acl
 
 
 ################################################################################
 S3_SECURITY_CHECKS = [
     check_bucket_versioning,
     check_bucket_encryption,
-    check_bucket_acl,
     check_public_access_block,
-    Get_Bucket_Logging
+    check_bucket_logging,
+    check_bucket_acl
 ]
 
 
@@ -50,14 +52,17 @@ def setup_logger()->None:
 )   
     feeder(message)
 
-def scan_s3_buckets() -> None:
+def scan_s3_buckets() :
+    all_findings = []
     feeder("\n" + SEPARATOR)
-    feeder(" S3 SECURITY ASSESSMENT")
+    feeder(f"{COLORS['BOLD']} S3 SECURITY ASSESSMENT")
     feeder(SEPARATOR)
     session = create_session()
     s3_client = session.client('s3')
-    for bucket in list_buckets(s3_client):
-        feeder(f"\n[RESOURCE] {bucket}")
+    buckets=list_buckets(s3_client)
+    bucket_count=len(buckets)
+    for bucket in buckets:
+        feeder(f"\n{COLORS['BLUE']}[RESOURCE]{COLORS['RESET']} {bucket} \n")
         
         results = [
         check(bucket,s3_client)
@@ -66,20 +71,17 @@ def scan_s3_buckets() -> None:
 
         for result in results:
             feeder(result)
+        all_findings.extend(results)
         
             
-    feeder("\n" + SEPARATOR)
-    feeder(" SCAN COMPLETE")
-    feeder(SEPARATOR)
-
-        
-
+    return  all_findings , bucket_count
         
 
 def main():
     setup_logger()
-    scan_s3_buckets()
-
+    findings,bucket_count=scan_s3_buckets()
+    
+    print_summary(findings,bucket_count)
 
 if __name__ == "__main__":
     main()
