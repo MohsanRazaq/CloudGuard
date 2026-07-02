@@ -1,15 +1,14 @@
 from cloudguard.findings import Finding
 
-def Get_Bucket_Logging(bucket_name:str,s3_client):
+def check_bucket_logging(bucket_name:str,s3_client):
     try:
         response = s3_client.get_bucket_logging(Bucket=bucket_name)
-        
-    except Exception as e:
+    except Exception as e:        
         return Finding(
                 check='Bucket Logging',
                 resource=bucket_name,
                 passed=False,
-                severity='Medium',
+                severity='MEDIUM',
                 issue=f'Failed to fetch configuration: {str(e)}',
                 recommendation='Verify IAM permission for s3:GetBuckLogging'
                 
@@ -20,9 +19,9 @@ def Get_Bucket_Logging(bucket_name:str,s3_client):
                 check='Bucket Logging',
                 resource=bucket_name,
                 passed=False,
-                severity='High',
+                severity='HIGH',
                 issue=f'Server access logging is not enabled on this bucket',
-                recommendation='Configure server access logging using s3_client'
+                recommendation='Enable S3 Server Access Logging and configure a dedicated log bucket.'
                 
             )
         
