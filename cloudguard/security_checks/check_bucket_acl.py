@@ -1,7 +1,6 @@
 from cloudguard.findings import Finding
 
 def check_bucket_acl(bucket_name,s3_client):
-    response=s3_client.get_bucket_acl(Bucket=bucket_name)
     try:
         is_public=False
         Exposure_type=''
@@ -15,11 +14,11 @@ def check_bucket_acl(bucket_name,s3_client):
             
             if grantee.get('Type','')=='Group':
                 group_uri=grantee.get('URI','')
-                if "Allusers" in group_uri:
+                if "AllUsers" in group_uri:
                     is_public=True
                     Exposure_type="Public Anonymous Access (AllUsers)"
                     break
-                elif "Authenticatedusers" in group_uri:
+                elif "AuthenticatedUsers" in group_uri:
                     is_public=True
                     Exposure_type='Any Authenticated AWS User Access'
                     break
