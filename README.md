@@ -427,27 +427,31 @@ Each security check runs independently and returns a standardized `Finding` obje
 
 This modular design allows new security checks and cloud services to be added without modifying the core scanning engine.
 
+
 ## 📄 Example JSON Report
 
 ```json
 {
   "scan_metadata": {
-        "engine": "CloudGuard",
-        "version": "v1.0.0",
-        "timestamp": "2026-07-04 00:57:59",
-        "tasks_run": [
-            "scan_s3"
-        ]
+    "engine": "CloudGuard",
+    "version": "v1.0.0",
+    "timestamp": "2026-07-04 00:57:59",
+    "tasks_run": [
+      "scan_s3"
+    ]
+  },
+  "findings": [
+    {
+      "check": "Public Access Block",
+      "resource": "cloudguard-learning-bucket-test",
+      "passed": false,
+      "severity": "HIGH",
+      "issue": "Public Access block is incomplete or disabled",
+      "recommendation": "Enable All 4 public Access Block Setting"
     }
-
-{
-            "check": "Public Access Block",
-            "resource": "cloudguard-learning-bucket-test",
-            "passed": false,
-            "severity": "HIGH",
-            "issue": "Public Access block is incomplete or disabled",
-            "recommendation": "Enable All 4 public Access Block Setting"
-        }}
+  ]
+}
+```
 
 CloudGuard exports a complete JSON report that can be integrated with dashboards, CI/CD pipelines, or other automation workflows.
 
