@@ -9,11 +9,10 @@ def test_versioning_disabled_is_flagged():
     fake_s3 = boto3.client("s3", region_name="us-east-1")
     fake_bucket = "my-fake-unversioned-bucket"
     fake_s3.create_bucket(Bucket=fake_bucket)
-    # versioning is off by default — nothing to enable here
 
     result = check_bucket_versioning(fake_bucket, fake_s3)
 
-    assert "Versioning" in str(result)
+    assert "[PASS]" not in str(result)
 
 @mock_aws
 def test_versioning_enabled_passes():
@@ -27,4 +26,4 @@ def test_versioning_enabled_passes():
 
     result = check_bucket_versioning(fake_bucket, fake_s3)
 
-    assert result is None or "Versioning" not in str(result)
+    assert "[PASS]" in str(result)
