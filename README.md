@@ -1,3 +1,4 @@
+![Tests](https://github.com/MohsanRazaq/CloudGuard/actions/workflows/tests.yml/badge.svg)
 # ☁️ CloudGuard
 
 > An extensible cloud security scanner for identifying cloud misconfigurations and generating actionable security reports.
@@ -326,6 +327,29 @@ Security Score : 82/100
 Risk Level     : MEDIUM
 Buckets Scanned: 5
 ```
+## How the Security Score is Calculated
+
+Every scan starts at a perfect score of 100. Points are deducted for each
+failed security check, weighted by severity:
+
+| Severity | Points deducted per finding |
+|----------|------------------------------|
+| Critical | 25 |
+| High     | 10 |
+| Medium   | 5  |
+| Low      | 2  |
+
+The final score determines the overall risk level:
+
+| Score range | Risk level |
+|-------------|------------|
+| 90–100      | LOW RISK |
+| 70–89       | MEDIUM RISK |
+| Below 70    | HIGH RISK |
+
+The score is capped at a minimum of 0 — a resource with many critical
+findings will show as 0/100 rather than a negative number.
+
 ## ✅ Tested Environment
 
 | Component | Version |
@@ -459,10 +483,11 @@ CloudGuard exports a complete JSON report that can be integrated with dashboards
 
 ## Version 0.2
 
-- [ ] HTML Reports
-- [ ] CSV Export
-- [ ] Improved Risk Scoring
-- [ ] More Unit Tests
+- [ ] HTML Report Generation
+- [ ] CSV Report Export
+- [ ] Enhanced Risk Scoring Engine
+- [ ] Expand Unit Test Coverage
+- [ ] Automated Testing with GitHub Actions (CI)
 
 ## Version 0.3
 

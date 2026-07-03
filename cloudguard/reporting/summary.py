@@ -27,12 +27,12 @@ def print_summary(findings, bucket_count, start, end):
             if severity in severity_count:
                 severity_count[severity] += 1  
 
-    critical_weightage=severity_count['CRITICAL']*25 if severity_count['CRITICAL']>0 else 0          
-    high_weightage=severity_count['HIGH']*10         if severity_count['HIGH']>0 else 0       
-    medium_weightage=severity_count['MEDIUM']*5      if severity_count['MEDIUM']>0 else 0       
-    low_weightage=severity_count['LOW']*2            if severity_count['LOW']>0 else 0       
-    total_pass=critical_weightage+high_weightage+low_weightage+medium_weightage    
-    score-=total_pass
+    critical_weightage=severity_count['CRITICAL']*25         
+    high_weightage=severity_count['HIGH']*10                
+    medium_weightage=severity_count['MEDIUM']*5      
+    low_weightage=severity_count['LOW']*2                  
+    total_deduction=critical_weightage+high_weightage+low_weightage+medium_weightage    
+    score = max(0, score - total_deduction)
 
 
     if score >= 90:

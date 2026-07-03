@@ -1,12 +1,30 @@
-from cloudguard.aws.s3_scanner import list_buckets
-from cloudguard.security_checks.check_bucket_versioning import (
-    check_bucket_versioning
-)
+# tests/test_versioning.py
+import os
+import boto3
+from moto import mock_aws
+from cloudguard.security_checks.check_bucket_versioning import check_bucket_versioning
 
-for bucket in list_buckets():
-    finding = check_bucket_versioning(bucket)
+@mock_aws
+def test_versioning_disabled_is_flagged():
+    fake_s3 = boto3.client("s3", region_name="us-east-1")
+    fake_bucket = "my-fake-unversioned-bucket"
+    fake_s3.create_bucket(Bucket=fake_bucket)
+    # versioning is off by default — nothing to enable here
 
-    if finding:
-        print(finding)
-    else:
-        print(f"{bucket}: Versioning Enabled")
+    result = check_bucket_versioning(fake_bucket, fake_s3)
+
+    assert "Versioning" in str(result)
+
+@mock_aws
+def test_versioning_enabled_passes():
+    fake_s3 = boto3.client("s3", region_name="us-east-1")
+    fake_bucket = "my-fake-versioned-bucket"
+    fake_s3.create_bucket(Bucket=fake_bucket)
+    fake_s3.put_bucket_versioning(
+        Bucket=fake_bucket,
+        VersioningConfiguration={"Status": "Enabled"}
+    )
+
+    result = check_bucket_versioning(fake_bucket, fake_s3)
+
+    assert result is None or "Versioning" not in str(result)

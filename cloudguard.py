@@ -98,7 +98,7 @@ def export_to_json(all_findings,running_tasks):
     json_payload={
         "scan_metadata": {
             "engine": "CloudGuard",
-            "version": "v1.0.0",
+            "version": "v0.1.0",
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "tasks_run": running_tasks
         },

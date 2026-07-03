@@ -23,3 +23,5 @@ logs/
 .coverage
 .pytest_cache
 .mypy_cache/
+
+cloudguard_report.json
