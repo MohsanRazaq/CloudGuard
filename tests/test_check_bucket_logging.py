@@ -18,6 +18,26 @@ def test_logging_enabled_passes():
     target_bucket = "my-fake-target-log-bucket"
     fake_s3.create_bucket(Bucket=fake_bucket)
     fake_s3.create_bucket(Bucket=target_bucket)
+
+    # Real AWS requires the log-delivery group to have write access
+    # on the target bucket before logging can be enabled to it.
+    fake_s3.put_bucket_acl(
+        Bucket=target_bucket,
+        AccessControlPolicy={
+            "Owner": {"ID": "owner-id"},
+            "Grants": [
+                {
+                    "Grantee": {"Type": "Group", "URI": "http://acs.amazonaws.com/groups/s3/LogDelivery"},
+                    "Permission": "WRITE"
+                },
+                {
+                    "Grantee": {"Type": "Group", "URI": "http://acs.amazonaws.com/groups/s3/LogDelivery"},
+                    "Permission": "READ_ACP"
+                }
+            ]
+        }
+    )
+
     fake_s3.put_bucket_logging(
         Bucket=fake_bucket,
         BucketLoggingStatus={
