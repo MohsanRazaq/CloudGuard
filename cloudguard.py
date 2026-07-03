@@ -7,13 +7,14 @@ from cloudguard.reporting.summary import print_summary
 from cloudguard.security_checks.check_bucket_versioning import (
     check_bucket_versioning
 )
-from cloudguard.findings import Finding ,COLORS
+from cloudguard.findings import COLORS
 from cloudguard.aws.session import create_session
 from cloudguard.constants import SEPARATOR
 from cloudguard.security_checks.check_bucket_encryption import check_bucket_encryption
 from cloudguard.security_checks.check_bucket_public_block import check_public_access_block
 from cloudguard.security_checks.check_bucket_logging import check_bucket_logging
 from cloudguard.security_checks.check_bucket_acl import check_bucket_acl
+from cloudguard.security_checks.check_bucket_policy import check_bucket_policy
 
 
 
@@ -22,12 +23,13 @@ S3_SECURITY_CHECKS = [
     check_bucket_encryption,
     check_public_access_block,
     check_bucket_logging,
-    check_bucket_acl
+    check_bucket_acl,
+    check_bucket_policy
 ]
 
 
 def feeder(message: object, plain_text_log: str = "") -> None:
-    """Prints colorized output to console but writes clean text to log files."""
+    """print colorized output to console but writes clean text to log files."""
     text_to_print = str(message)
     print(text_to_print)
     
@@ -39,6 +41,7 @@ def feeder(message: object, plain_text_log: str = "") -> None:
             clean_text = clean_text.replace(code, "")
         write_log(clean_text)
     
+################################################################################################
 def setup_logger() -> None:
     config = load_config()
     running_tasks = []
@@ -61,6 +64,7 @@ def setup_logger() -> None:
         + SEPARATOR
     )   
     feeder(message)
+################################################################################################
 
 def scan_s3_buckets() :
     all_findings = []
@@ -86,13 +90,15 @@ def scan_s3_buckets() :
             
     return  all_findings , bucket_count
 
+################################################################################################
+
 def export_to_json(all_findings,running_tasks):
     
     findings_list=[finding.to_dict() for finding in all_findings]    
     json_payload={
         "scan_metadata": {
             "engine": "CloudGuard",
-            "version": "v0.2",
+            "version": "v1.0.0",
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "tasks_run": running_tasks
         },
@@ -100,13 +106,15 @@ def export_to_json(all_findings,running_tasks):
     report_filename="cloudguard_report.json"
     with open (report_filename,'w') as json_file:
         json.dump(json_payload,json_file,indent=4)
-        
-        
     feeder(f"\n{COLORS['GREEN']}JSON report exported successfully to {report_filename}!{COLORS['RESET']}")
+    
+################################################################################################
 def main():
     setup_logger()
+    start_time=datetime.now()
     findings,bucket_count=scan_s3_buckets()
-    print_summary(findings,bucket_count)
+    end_time=datetime.now()
+    print_summary(findings,bucket_count,start_time,end_time)
     config = load_config()
     running_tasks = [task for task, enabled in config.items() if enabled]
     export_to_json(findings, running_tasks)
