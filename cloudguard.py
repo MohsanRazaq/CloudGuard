@@ -1,4 +1,4 @@
-import json
+import json,argparse
 from datetime import datetime
 from cloudguard.utils.config_loader import load_config
 from cloudguard.utils.logger import write_log
@@ -110,6 +110,13 @@ def export_to_json(all_findings,running_tasks):
     
 ################################################################################################
 def main():
+    parser=argparse.ArgumentParser(description='')
+    parser.add_argument(
+        "--json",
+        action='store_true',
+        help="create json outfile if specified"
+    )
+    args=parser.parse_args()
     setup_logger()
     start_time=datetime.now()
     findings,bucket_count=scan_s3_buckets()
@@ -117,7 +124,12 @@ def main():
     print_summary(findings,bucket_count,start_time,end_time)
     config = load_config()
     running_tasks = [task for task, enabled in config.items() if enabled]
-    export_to_json(findings, running_tasks)
+    
+    if args.json:
+        export_to_json(findings, running_tasks)
+    else:
+        print("Execution completed. no json output file  was asked")
+        
 
 if __name__ == "__main__":
     main()
