@@ -73,8 +73,25 @@ if st.sidebar.button(" Run Cloud Security Scan", type="primary"):
         if status_column:
             chart_col, data_col = st.columns([1, 2])
             with chart_col:
+                import matplotlib.pyplot as plt
+
                 status_counts = df[status_column].value_counts()
-                st.bar_chart(status_counts)
+                
+                fig, ax = plt.subplots()
+                ax.pie(
+                    status_counts, 
+                    labels=status_counts.index, 
+                    autopct='%1.1f%%', 
+                    startangle=90,
+                    colors=['#ff4b4b', '#00c0f2', '#ffbd45'][:len(status_counts)] # Dynamic fallback colors
+                )
+                ax.axis('equal')  
+                
+                st.pyplot(fig)
+                
+            with data_col:
+                st.dataframe(df, use_container_width=True)
+
 
 
             with data_col:
