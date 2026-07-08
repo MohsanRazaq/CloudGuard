@@ -74,7 +74,6 @@ if st.sidebar.button(" Run Cloud Security Scan", type="primary"):
             chart_col, data_col = st.columns([1, 2])
             with chart_col:
                 status_counts = df[status_column].value_counts()
-                # Native streamline alternative that works without configurations
                 st.bar_chart(status_counts)
 
 
