@@ -3,18 +3,19 @@ from datetime import datetime
 from cloudguard.utils.config_loader import load_config
 from cloudguard.utils.logger import write_log
 from cloudguard.aws.s3_scanner import list_buckets
+from cloudguard.aws.iam_scanner import scan_iam
 from cloudguard.reporting.summary import print_summary
-from cloudguard.security_checks.check_bucket_versioning import (
+from cloudguard.security_checks.s3.check_bucket_versioning import (
     check_bucket_versioning
 )
 from cloudguard.findings import COLORS
 from cloudguard.aws.session import create_session
 from cloudguard.constants import SEPARATOR
-from cloudguard.security_checks.check_bucket_encryption import check_bucket_encryption
-from cloudguard.security_checks.check_bucket_public_block import check_public_access_block
-from cloudguard.security_checks.check_bucket_logging import check_bucket_logging
-from cloudguard.security_checks.check_bucket_acl import check_bucket_acl
-from cloudguard.security_checks.check_bucket_policy import check_bucket_policy
+from cloudguard.security_checks.s3.check_bucket_encryption import check_bucket_encryption
+from cloudguard.security_checks.s3.check_bucket_public_block import check_public_access_block
+from cloudguard.security_checks.s3.check_bucket_logging import check_bucket_logging
+from cloudguard.security_checks.s3.check_bucket_acl import check_bucket_acl
+from cloudguard.security_checks.s3.check_bucket_policy import check_bucket_policy
 
 
 
@@ -26,6 +27,7 @@ S3_SECURITY_CHECKS = [
     check_bucket_acl,
     check_bucket_policy
 ]
+
 
 
 def feeder(message: object, plain_text_log: str = "") -> None:
@@ -40,6 +42,10 @@ def feeder(message: object, plain_text_log: str = "") -> None:
         for code in COLORS.values():
             clean_text = clean_text.replace(code, "")
         write_log(clean_text)
+#############################################################################################
+session = create_session()
+s3_client = session.client('s3')
+iam_client = session.client("iam")
     
 ################################################################################################
 def setup_logger() -> None:
@@ -71,8 +77,6 @@ def scan_s3_buckets() :
     feeder("\n" + SEPARATOR)
     feeder(f"{COLORS['BOLD']} S3 SECURITY ASSESSMENT")
     feeder(SEPARATOR)
-    session = create_session()
-    s3_client = session.client('s3')
     buckets=list_buckets(s3_client)
     bucket_count=len(buckets)
     for bucket in buckets:
@@ -120,8 +124,10 @@ def main():
     setup_logger()
     start_time=datetime.now()
     findings,bucket_count=scan_s3_buckets()
+    iam_findings = scan_iam(iam_client, feeder)
+    findings.extend(iam_findings)
     end_time=datetime.now()
-    print_summary(findings,bucket_count,start_time,end_time)
+    print_summary(findings, bucket_count, start_time, end_time)
     config = load_config()
     running_tasks = [task for task, enabled in config.items() if enabled]
     
