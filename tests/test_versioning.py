@@ -2,7 +2,7 @@
 import os
 import boto3
 from moto import mock_aws
-from cloudguard.security_checks.check_bucket_versioning import check_bucket_versioning
+from cloudguard.security_checks.s3.check_bucket_versioning import check_bucket_versioning
 
 @mock_aws
 def test_versioning_disabled_is_flagged():

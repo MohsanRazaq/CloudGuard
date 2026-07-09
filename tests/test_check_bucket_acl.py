@@ -1,7 +1,7 @@
 # tests/test_check_bucket_acl.py
 import boto3
 from moto import mock_aws
-from cloudguard.security_checks.check_bucket_acl import check_bucket_acl
+from cloudguard.security_checks.s3.check_bucket_acl import check_bucket_acl
 
 @mock_aws
 def test_acl_public_allusers_is_flagged():
