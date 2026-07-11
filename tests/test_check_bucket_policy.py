@@ -2,7 +2,7 @@
 import json
 import boto3
 from moto import mock_aws
-from cloudguard.security_checks.check_bucket_policy import check_bucket_policy
+from cloudguard.security_checks.s3.check_bucket_policy import check_bucket_policy
 
 @mock_aws
 def test_policy_public_is_flagged():

@@ -3,7 +3,7 @@ import os,logging
 import pytest
 import boto3
 from moto import mock_aws
-from cloudguard.security_checks.check_bucket_encryption import check_bucket_encryption
+from cloudguard.security_checks.s3.check_bucket_encryption import check_bucket_encryption
 
 @pytest.fixture(scope="function", autouse=True)
 def aws_credentials():

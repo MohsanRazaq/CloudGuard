@@ -1,7 +1,7 @@
 # tests/test_check_bucket_logging.py
 import boto3
 from moto import mock_aws
-from cloudguard.security_checks.check_bucket_logging import check_bucket_logging
+from cloudguard.security_checks.s3.check_bucket_logging import check_bucket_logging
 
 @mock_aws
 def test_logging_disabled_is_flagged():
