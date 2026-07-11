@@ -560,8 +560,8 @@ CloudGuard exports machine-readable JSON reports for automation and integration.
 
 - Programming Language: Python
 - Cloud Provider: AWS
-- Services Supported: Amazon S3
-- Security Checks: 6
+- Services Supported: Amazon S3,IAM
+- Security Checks: 7
 - Report Formats: CLI, JSON
 - Architecture: Modular
 
