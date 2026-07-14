@@ -46,6 +46,7 @@ CloudGuard is currently under active development.
 - Improved HTML Reports
 - Advanced Security Scoring
 - Additional Unit Tests
+- IAM_user_mfa
 
 ### 📌 Planned
 
