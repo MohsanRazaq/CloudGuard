@@ -113,29 +113,68 @@ def export_to_json(all_findings,running_tasks):
     feeder(f"\n{COLORS['GREEN']}JSON report exported successfully to {report_filename}!{COLORS['RESET']}")
     
 ################################################################################################
+def report(findings,buck_c,sT,eT):
+    print_summary(findings, buck_c, sT, eT)
+
+#################################################################################################
 def main():
-    parser=argparse.ArgumentParser(description='')
+    parser = argparse.ArgumentParser(
+        description='CloudGuard: Lightweight AWS Security Scanner'
+    )
+    parser.add_argument(
+        "--scan",
+        action='store_true',
+        help="Execute S3 and IAM security scans"
+    )
     parser.add_argument(
         "--json",
         action='store_true',
-        help="create json outfile if specified"
+        help="Write scan results to a JSON report file"
     )
-    args=parser.parse_args()
-    setup_logger()
-    start_time=datetime.now()
-    findings,bucket_count=scan_s3_buckets()
-    iam_findings = scan_iam(iam_client, feeder)
-    findings.extend(iam_findings)
-    end_time=datetime.now()
-    print_summary(findings, bucket_count, start_time, end_time)
+    parser.add_argument(
+        "--report",
+        action='store_true',
+        help="Print a summary report to the terminal"
+    )
+    
+    args = parser.parse_args()
+    
+    start_time = datetime.now()
+    findings = []
+    bucket_count = 0
     config = load_config()
     running_tasks = [task for task, enabled in config.items() if enabled]
-    
-    if args.json:
-        export_to_json(findings, running_tasks)
-    else:
-        print("Execution completed. no json output file  was asked")
-        
 
-if __name__ == "__main__":
+    if args.scan:
+        setup_logger()
+        
+        if config.get("s3", True): 
+            s3_findings, bucket_count = scan_s3_buckets()
+            findings.extend(s3_findings)
+            
+        if config.get("iam", True):
+            iam_findings = scan_iam(iam_client, feeder)
+            findings.extend(iam_findings)
+    else:
+        feeder(f"\n{COLORS['YELLOW']}[WARN]{COLORS['RESET']} No scan requested. Use --scan to run assessment.")
+
+    end_time = datetime.now()
+    
+    if args.report:
+        if findings:
+            report(findings, bucket_count, start_time, end_time)
+        else:
+            print("No findings to report. Did you run the scan with --scan?")
+    else:
+        print("No summary report requested (missing --report).")
+        
+    if args.json:
+        if findings:
+            export_to_json(findings, running_tasks)
+        else:
+            print("No findings to export to JSON.")
+    else:
+        print("Execution completed. No JSON output file requested.")
+        
+if __name__=="__main__":
     main()
