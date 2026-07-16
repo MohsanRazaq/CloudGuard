@@ -25,3 +25,4 @@ logs/
 .mypy_cache/
 
 cloudguard_report.json
+cloudguard_report.json
