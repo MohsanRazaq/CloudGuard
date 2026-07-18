@@ -1,7 +1,9 @@
-from cloudguard.security_checks.iam.check_user_mfa import check_user_mfa
+from cloudguard.security_checks.iam.check_user_mfa import check_user_mfa 
+from cloudguard.security_checks.iam.check_access_last_used import check_access_last_used
 from cloudguard.utils.logger import feeder
 IAM_SECURITY_CHECKS = [
-    check_user_mfa
+    check_user_mfa,
+    check_access_last_used
 ]
 
 
