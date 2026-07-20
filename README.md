@@ -4,7 +4,7 @@
 > An extensible cloud security scanner for identifying cloud misconfigurations and generating actionable security reports.
 
 **Current Provider:** Amazon Web Services (AWS)  
-**Current Service:** Amazon S3
+**Current Service:** Amazon IAM, Plugins Picker
 
 CloudGuard is an open-source cloud security assessment tool designed to help developers, cloud engineers, and security professionals discover insecure cloud configurations before deployment. The project currently focuses on Amazon S3 security assessments and is built with a modular architecture that can be extended to additional AWS services and other cloud providers in future releases.
 
