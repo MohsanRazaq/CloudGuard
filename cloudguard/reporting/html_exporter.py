@@ -1,25 +1,47 @@
+import os
 from datetime import datetime
 from cloudguard.findings import COLORS 
 from cloudguard.utils.logger import feeder
+
 def export_to_html(all_findings, running_tasks):
     findings_list = [finding.to_dict() for finding in all_findings]
     
     table_rows = ""
     for f in findings_list:
-        status = f.get('status', 'INFO')
-        resource = f.get('resource_id', f.get('resource', 'Unknown'))
-        description = f.get('description', f.get('message', 'No details provided'))
+        passed = f.get('passed', False)
+        severity = str(f.get('severity', 'HIGH')).upper() if not passed else "PASS"
+        resource = f.get('resource', 'Global / Account')
+        check = f.get('check', 'Security Check')
+        issue = f.get('issue', 'Secure and compliant')
+        recommendation = f.get('recommendation', 'No action required')
         
-        bg_color = "#ffebee" if status == "FAIL" else "#e8f5e9"
-        text_color = "#c62828" if status == "FAIL" else "#2e7d32"
+        # colour badge for severity
+        if passed:
+            bg_color, text_color = "#e8f5e9", "#2e7d32"  # Green
+            badge_text = "PASS"
+        elif severity == "CRITICAL":
+            bg_color, text_color = "#f3e5f5", "#7b1fa2"  # Purple
+            badge_text = "CRITICAL"
+        elif severity == "HIGH":
+            bg_color, text_color = "#ffebee", "#c62828"  # Red
+            badge_text = "HIGH"
+        elif severity == "MEDIUM":
+            bg_color, text_color = "#fffde7", "#f57f17"  # Yellow/Orange
+            badge_text = "MEDIUM"
+        else:
+            bg_color, text_color = "#e3f2fd", "#1565c0"  # Blue/Gray
+            badge_text = "LOW"
         
         table_rows += f"""
         <tr>
-            <td><span style="background: {bg_color}; color: {text_color}; padding: 4px 8px; border-radius: 4px; font-weight: bold;">{status}</span></td>
+            <td><span style="background: {bg_color}; color: {text_color}; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85em;">{badge_text}</span></td>
             <td><strong>{resource}</strong></td>
-            <td>{description}</td>
+            <td><strong>{check}</strong><br><span style="color: #64748b; font-size: 0.9em;">{issue}</span></td>
+            <td style="color: #0d9488; font-size: 0.9em;">{recommendation}</td>
         </tr>
         """
+
+    tasks_str = ', '.join(running_tasks) if running_tasks else "All Plugins"
 
     html_content = f"""
     <!DOCTYPE html>
@@ -29,32 +51,34 @@ def export_to_html(all_findings, running_tasks):
         <title>CloudGuard Security Report</title>
         <style>
             body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background: #f5f7fb; color: #333; }}
-            .container {{ max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
-            h1 {{ color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }}
+            .container {{ max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+            h1 {{ color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0; }}
             .metadata {{ background: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 0.9em; }}
             table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
-            th, td {{ padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }}
-            th {{ background: #f1f5f9; color: #475569; }}
+            th, td {{ padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: top; }}
+            th {{ background: #f1f5f9; color: #475569; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em; }}
             tr:hover {{ background: #f8fafc; }}
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>CloudGuard Security Assessment</h1>
+            <h1>🛡️ CloudGuard Security Assessment Report</h1>
             <div class="metadata">
                 <p><strong>Generated:</strong> {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
-                <p><strong>Tasks Executed:</strong> {', '.join(running_tasks)}</p>
+                <p><strong>Tasks Executed:</strong> {tasks_str}</p>
+                <p><strong>Total Findings:</strong> {len(all_findings)}</p>
             </div>
             <table>
                 <thead>
                     <tr>
                         <th>Status</th>
                         <th>Resource</th>
-                        <th>Description</th>
+                        <th>Check & Issue</th>
+                        <th>Recommendation</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {table_rows if table_rows else "<tr><td colspan='3'>No findings recorded.</td></tr>"}
+                    {table_rows if table_rows else "<tr><td colspan='4'>No findings recorded.</td></tr>"}
                 </tbody>
             </table>
         </div>

@@ -1,6 +1,5 @@
 from cloudguard.findings import COLORS
-from rich.console import Console
-from rich.progress_bar import ProgressBar
+
 def print_summary(findings, bucket_count, start, end):
     severity_count = {
         "CRITICAL": 0,
@@ -15,33 +14,28 @@ def print_summary(findings, bucket_count, start, end):
     failed = 0
 
     for finding in findings:
-        if finding.passed:
+        if getattr(finding, 'passed', False):
             passed += 1
         else:
             failed += 1
-            
-            
-            severity = finding.severity
-            
-            
+            severity = str(getattr(finding, 'severity', 'HIGH')).upper()
             if severity in severity_count:
                 severity_count[severity] += 1  
 
-    critical_weightage=severity_count['CRITICAL']*25         
-    high_weightage=severity_count['HIGH']*10                
-    medium_weightage=severity_count['MEDIUM']*5      
-    low_weightage=severity_count['LOW']*2                  
-    total_deduction=critical_weightage+high_weightage+low_weightage+medium_weightage    
+    critical_weightage = severity_count['CRITICAL'] * 25         
+    high_weightage = severity_count['HIGH'] * 10                
+    medium_weightage = severity_count['MEDIUM'] * 5      
+    low_weightage = severity_count['LOW'] * 2                  
+    total_deduction = critical_weightage + high_weightage + medium_weightage + low_weightage    
     score = max(0, score - total_deduction)
 
-
+    # Determine Risk Label
     if score >= 90:
         risk_level = f"{COLORS['GREEN']}LOW RISK{COLORS['RESET']}"
     elif score >= 70:
         risk_level = f"{COLORS['YELLOW']}MEDIUM RISK{COLORS['RESET']}"
     else:
         risk_level = f"{COLORS['RED']}HIGH RISK{COLORS['RESET']}"
-    
 
     print(f'''
 ============================================================
@@ -58,8 +52,8 @@ Checks Executed : {total_checks}
 Passed          : {passed}
 Failed          : {failed}
 
-Critical        : {COLORS['RED']}{severity_count["CRITICAL"]}{COLORS['RESET']}
-High            : {COLORS['GREEN']}{severity_count["HIGH"]}{COLORS['RESET']}
+Critical        : {COLORS['PURPLE']}{severity_count["CRITICAL"]}{COLORS['RESET']}
+High            : {COLORS['RED']}{severity_count["HIGH"]}{COLORS['RESET']}
 Medium          : {COLORS['YELLOW']}{severity_count["MEDIUM"]}{COLORS['RESET']}
-Low             : {COLORS['WHITE_BRIGHT']}{severity_count["LOW"]}{COLORS['RESET']}
+Low             : {COLORS['BLUE']}{severity_count["LOW"]}{COLORS['RESET']}
 ''')
