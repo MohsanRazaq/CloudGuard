@@ -1,10 +1,10 @@
 ![Tests](https://github.com/MohsanRazaq/CloudGuard/actions/workflows/tests.yml/badge.svg)
-# ☁️ CloudGuard
+#  CloudGuard
 
 > An extensible cloud security scanner for identifying cloud misconfigurations and generating actionable security reports.
 
 **Current Provider:** Amazon Web Services (AWS)  
-**Current Service:** Amazon IAM, Plugins Picker
+**Current Services:** Amazon S3, AWS IAM, Dynamic Plugin Engine
 
 CloudGuard is an open-source cloud security assessment tool designed to help developers, cloud engineers, and security professionals discover insecure cloud configurations before deployment. The project currently focuses on Amazon S3 security assessments and is built with a modular architecture that can be extended to additional AWS services and other cloud providers in future releases.
 
@@ -28,18 +28,28 @@ CloudGuard is currently under active development.
 
 ### ✅ Implemented
 
-- AWS S3 Security Scanner
+- Dynamic Plugin Engine
+- Automatic Plugin Discovery
+- Plugin Registry
+- Plugin Interface Architecture
+- AWS S3 Security Assessment
 - Bucket Versioning Check
 - Bucket Encryption Check
 - Bucket ACL Review
-- Public Access Block Validation
 - Bucket Policy Analysis
+- Public Access Block Validation
 - Server Access Logging Check
+- AWS IAM Security Assessment
+- IAM MFA Audit
+- IAM Access Key Audit
 - Security Score Calculation
 - Risk Classification
-- Colorized CLI Output
+- HTML Report Generator
 - JSON Report Export
-- Scan Summary
+- Colorized CLI Output
+- Streamlit Dashboard
+- Pytest Test Suite
+- GitHub Actions CI
 
 ### 🔄 In Progress
 
@@ -90,6 +100,27 @@ After each scan, CloudGuard generates:
 ### 🏗️ Modular Architecture
 
 CloudGuard is designed to be easily extended.
+---
+                 CLI / Dashboard
+                        │
+                        ▼
+                 Scan Engine
+                        │
+                        ▼
+              Plugin Manager
+                        │
+      ┌─────────────────┼────────────────ti─┐
+      ▼                 ▼                 ▼
+   S3 Plugins      IAM Plugins      Future Plugins
+      │                 │
+      └────────────┬────┘
+                   ▼
+            Finding Engine
+                   │
+                   ▼
+           HTML / JSON / CLI
+
+           ---
 
 Current modules include:
 
@@ -104,8 +135,35 @@ Current modules include:
 This modular architecture allows new security checks and cloud services to be added with minimal code changes.
 
 ---
+### Plugin Engine
 
-### ⚙️ Configuration
+- Dynamic Plugin Discovery
+- Automatic Plugin Registration
+- Plugin Interface
+- Plugin Registry
+- Runtime Plugin Loading
+- Service-based Plugin Organization
+
+
+## 🔌 Dynamic Plugin System
+
+CloudGuard now uses a dynamic plugin architecture that automatically discovers and loads security plugins at runtime.
+
+Every plugin implements a common `PluginInterface`, allowing new security checks to be added without modifying the core scan engine.
+
+### Benefits
+
+- Automatic plugin discovery
+- Extensible architecture
+- Decoupled scan engine
+- Easy feature development
+- Independent security modules
+- Future support for AWS, Azure and GCP plugins
+
+---
+
+
+###  Configuration
 
 CloudGuard supports configurable scanning through `config.json`.
 
@@ -119,7 +177,7 @@ Additional modules will be supported as development continues.
 
 ---
 
-### 🚀 Future Expansion
+###  Future Expansion
 
 CloudGuard is being developed as a multi-cloud security assessment platform.
 
@@ -362,44 +420,23 @@ findings will show as 0/100 rather than a negative number.
 
 # 📂 Project Structure
 
-```
+```text
 CloudGuard/
-│
-├── cloudguard.py                 # Main application entry point
-├── config.json                   # Scan configuration
-├── requirements.txt              # Project dependencies
-├── README.md
-│
+├── cloudguard.py
+├── plugin_manager.py
+├── config.json
+├── requirements.txt
 ├── cloudguard/
-│   │
 │   ├── aws/
-│   │   ├── session.py            # AWS session management
-│   │   └── s3_scanner.py         # S3 resource discovery
-│   │
-│   ├── security_checks/
-│   │   ├── check_bucket_versioning.py
-│   │   ├── check_bucket_encryption.py
-│   │   ├── check_bucket_acl.py
-│   │   ├── check_bucket_logging.py
-│   │   ├── check_bucket_policy.py
-│   │   └── check_bucket_public_block.py
-│   │
+│   ├── engine/
 │   ├── reporting/
-│   │   ├── summary.py
-│   │   └── json_export.py
-│   │
-│   ├── utils/
-│   │   ├── config_loader.py
-│   │   └── logger.py
-│   │
-│   ├── findings.py               # Finding model
-│   └── constants.py              # Global constants
-│
-├── logs/
-│
-├── tests/
-│
-└── docs/
+│   ├── findings.py
+│   └── utils/
+├── plugins/
+│   ├── s3/
+│   └── iam/
+├── dashboard/
+└── tests/
 ```
 
 ---
@@ -484,15 +521,15 @@ CloudGuard exports a complete JSON report that can be integrated with dashboards
 
 ## Version 0.2
 
-- [ ] HTML Report Generation
-- [ ] CSV Report Export
-- [ ] Enhanced Risk Scoring Engine
-- [ ] Expand Unit Test Coverage
-- [ ] Automated Testing with GitHub Actions (CI)
+- [x] HTML Report Generation
+- [-] CSV Report Export
+- [-] Enhanced Risk Scoring Engine
+- [-] Expand Unit Test Coverage
+- [x] Automated Testing with GitHub Actions (CI)
 
 ## Version 0.3
 
-- [ ] IAM Security Assessment
+- [x] IAM Security Assessment
 - [ ] CloudTrail Security Checks
 - [ ] EC2 Security Assessment
 - [ ] Security Group Analysis
@@ -508,7 +545,7 @@ CloudGuard exports a complete JSON report that can be integrated with dashboards
 
 - [ ] Azure Support
 - [ ] Google Cloud Platform Support
-- [ ] Plugin System
+- [x] Plugin System
 - [ ] Web Dashboard
 
 ## 💡 Why I Built CloudGuard
@@ -562,9 +599,9 @@ CloudGuard exports machine-readable JSON reports for automation and integration.
 - Programming Language: Python
 - Cloud Provider: AWS
 - Services Supported: Amazon S3,IAM
-- Security Checks: 7
-- Report Formats: CLI, JSON
-- Architecture: Modular
+- Security Checks: 8+
+- Report Formats: CLI, HTML, JSON
+- Architecture: Plugin-Based Modular
 
 # 🤝 Contributing
 
