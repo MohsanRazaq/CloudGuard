@@ -22,11 +22,11 @@ Instead of overwhelming users with raw API responses, CloudGuard presents:
 - Scan summaries
 - JSON reports for automation
 
-## 🚧 Project Status
+##  Project Status
 
 CloudGuard is currently under active development.
 
-### ✅ Implemented
+### Implemented
 
 - Dynamic Plugin Engine
 - Automatic Plugin Discovery
@@ -51,14 +51,14 @@ CloudGuard is currently under active development.
 - Pytest Test Suite
 - GitHub Actions CI
 
-### 🔄 In Progress
+###  In Progress
 
 - Improved HTML Reports
 - Advanced Security Scoring
 - Additional Unit Tests
 - IAM_user_mfa
 
-### 📌 Planned
+###  Planned
 
 - IAM Security Assessment
 - CloudTrail Validation
@@ -68,9 +68,9 @@ CloudGuard is currently under active development.
 - Azure Support
 - Google Cloud Support
 
-## ✨ Features
+##  Features
 
-### 🔍 Security Assessment
+###  Security Assessment
 
 CloudGuard currently performs automated security assessments for Amazon S3 buckets, including:
 
@@ -83,7 +83,7 @@ CloudGuard currently performs automated security assessments for Amazon S3 bucke
 
 ---
 
-### 📊 Security Reporting
+###  Security Reporting
 
 After each scan, CloudGuard generates:
 
@@ -97,7 +97,7 @@ After each scan, CloudGuard generates:
 
 ---
 
-### 🏗️ Modular Architecture
+###  Modular Architecture
 
 CloudGuard is designed to be easily extended.
 ---
@@ -145,7 +145,7 @@ This modular architecture allows new security checks and cloud services to be ad
 - Service-based Plugin Organization
 
 
-## 🔌 Dynamic Plugin System
+##  Dynamic Plugin System
 
 CloudGuard now uses a dynamic plugin architecture that automatically discovers and loads security plugins at runtime.
 
@@ -192,7 +192,7 @@ Planned support includes:
 - Azure
 - Google Cloud Platform (GCP)
 
-## 🏛️ Architecture
+##  Architecture
 
 CloudGuard follows a modular architecture where each component has a single responsibility. This makes the scanner easy to maintain, test, and extend with additional cloud services and security checks.
 
@@ -360,6 +360,14 @@ python cloudguard.py
 
 ---
 
+##  Why I Built CloudGuard
+
+CloudGuard was created as a hands-on cloud security project to deepen my understanding of AWS security services and secure software design.
+
+Rather than relying solely on existing security tools, I wanted to build a scanner from scratch to understand how cloud security assessments work internally—from AWS API interactions to finding generation and reporting.
+
+The long-term vision is to evolve CloudGuard into a modular multi-cloud security assessment platform supporting AWS, Azure, and Google Cloud.
+
 ## Example Output
 
 ```text
@@ -453,7 +461,7 @@ CloudGuard/
 | **logs/** | Scan logs |
 | **docs/** | Documentation and screenshots |
 
-# 🧠 How CloudGuard Works
+#  How CloudGuard Works
 
 CloudGuard follows a simple scanning pipeline.
 
@@ -490,7 +498,7 @@ Each security check runs independently and returns a standardized `Finding` obje
 This modular design allows new security checks and cloud services to be added without modifying the core scanning engine.
 
 
-## 📄 Example JSON Report
+##  Example JSON Report
 
 ```json
 {
@@ -517,7 +525,7 @@ This modular design allows new security checks and cloud services to be added wi
 
 CloudGuard exports a complete JSON report that can be integrated with dashboards, CI/CD pipelines, or other automation workflows.
 
-# 🗺️ Roadmap
+#  Roadmap
 
 ## Version 0.2
 
@@ -546,17 +554,10 @@ CloudGuard exports a complete JSON report that can be integrated with dashboards
 - [ ] Azure Support
 - [ ] Google Cloud Platform Support
 - [x] Plugin System
-- [ ] Web Dashboard
+- [x] Web Dashboard
 
-## 💡 Why I Built CloudGuard
 
-CloudGuard was created as a hands-on cloud security project to deepen my understanding of AWS security services and secure software design.
-
-Rather than relying solely on existing security tools, I wanted to build a scanner from scratch to understand how cloud security assessments work internally—from AWS API interactions to finding generation and reporting.
-
-The long-term vision is to evolve CloudGuard into a modular multi-cloud security assessment platform supporting AWS, Azure, and Google Cloud.
-
-# 📸 Screenshots
+# Screenshots
 
 ## CloudGuard Scan
 
@@ -580,7 +581,7 @@ CloudGuard exports machine-readable JSON reports for automation and integration.
 
 ![JSON Report](docs/images/json_report.png)
 
-# ✅ Current Security Checks
+#  Current Security Checks
 
 | Check | Status |
 |--------|--------|
@@ -594,7 +595,7 @@ CloudGuard exports machine-readable JSON reports for automation and integration.
 | JSON Report | ✅ |
 | CLI Summary | ✅ |
 
-# 📈 Project Metrics
+#  Project Metrics
 
 - Programming Language: Python
 - Cloud Provider: AWS
@@ -603,7 +604,7 @@ CloudGuard exports machine-readable JSON reports for automation and integration.
 - Report Formats: CLI, HTML, JSON
 - Architecture: Plugin-Based Modular
 
-# 🤝 Contributing
+#  Contributing
 
 Contributions are welcome!
 
@@ -616,11 +617,11 @@ If you'd like to improve CloudGuard:
 
 Bug reports, feature requests, and security suggestions are always appreciated.
 
-# 📄 License
+#  License
 
 This project is licensed under the MIT License.
 
-# 🙏 Acknowledgements
+#  Acknowledgements
 
 CloudGuard is built using:
 
