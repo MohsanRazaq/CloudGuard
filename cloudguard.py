@@ -57,7 +57,7 @@ def handle_scan(args):
             return
 
         print(
-            f"\n🔍 Selective Scan Active: Running {len(plugins_to_run)} matched plugin(s)..."
+            f"\n Selective Scan Active: Running {len(plugins_to_run)} matched plugin(s)..."
         )
 
     # Run Scan Engine
@@ -97,7 +97,7 @@ Examples:
     parser = argparse.ArgumentParser(
         prog="cloudguard",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="🛡️  CloudGuard - Modular AWS Security Assessment Scanner",
+        description=" CloudGuard - Modular AWS Security Assessment Scanner",
         epilog=help_epilog,
     )
 
