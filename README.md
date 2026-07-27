@@ -345,8 +345,7 @@ Example:
 ```json
 {
     "scan_s3": true,
-    "scan_iam": false,
-    "scan_vpc": false
+    "scan_iam": false
 }
 ```
 
@@ -603,6 +602,12 @@ CloudGuard exports machine-readable JSON reports for automation and integration.
 - Security Checks: 8+
 - Report Formats: CLI, HTML, JSON
 - Architecture: Plugin-Based Modular
+
+
+# Next Implementations Quequed:
+
+ -IAM Checks[5]
+ -EC2 checks[5]
 
 #  Contributing
 
