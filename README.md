@@ -314,7 +314,52 @@ pip install -r requirements.txt
 ---
 
 ## Configure AWS Credentials
+## Environment Configuration (LocalStack vs. Real AWS)
 
+CloudGuard supports testing locally via **LocalStack** or scanning a **Live AWS Account** using a single configuration switch in `.env`.
+
+### 1. Create a `.env` File
+Create a `.env` file in the project root directory:
+
+```env
+# Set to 'true' for LocalStack, 'false' for Real AWS
+USE_LOCALSTACK=false
+
+# LocalStack Gateway Endpoint
+LOCALSTACK_ENDPOINT=http://localhost:4566
+
+# Default AWS Region
+AWS_DEFAULT_REGION=us-east-1
+
+Security Notice: Do not place real AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY inside .env to prevent accidental credential leakage in Git repositories
+
+##Execution Modes
+#Scan Live AWS Account
+Export your temporary or IAM credentials directly into your terminal environment, then launch the scan
+```bash
+# Set credentials in environment
+export AWS_ACCESS_KEY_ID="AKIAXXXXXXXXXXXXXXXX"
+export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+export AWS_DEFAULT_REGION="us-east-1"
+
+# Run CloudGuard scan
+python3 cloudguard.py --scan
+```
+```
+#Scan Offline via LocalStack
+
+Ensure your LocalStack Docker container is running, set USE_LOCALSTACK=true in .env, and execute with mock credentials:
+```bash
+# Ensure container is up
+docker ps
+
+# Run scan using LocalStack endpoint
+AWS_ENDPOINT_URL="http://localhost:4566" 
+AWS_ACCESS_KEY_ID="test" 
+AWS_SECRET_ACCESS_KEY="test" 
+python3 cloudguard.py --scan
+```
+```
 CloudGuard uses the default AWS credential chain provided by **boto3**.
 
 If AWS CLI is not configured, run:
