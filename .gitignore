@@ -31,3 +31,6 @@ cloudguard_report.html
 cloudguard_report.json
 cloudguard_report.html
 cloudguard_report.json
+
+docker-compose.yml
+aws_wrapper.py
