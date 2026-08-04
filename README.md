@@ -50,13 +50,13 @@ CloudGuard is currently under active development.
 - Streamlit Dashboard
 - Pytest Test Suite
 - GitHub Actions CI
+- Improved HTML Reports
+- IAM_user_mfa
 
 ###  In Progress
 
-- Improved HTML Reports
 - Advanced Security Scoring
 - Additional Unit Tests
-- IAM_user_mfa
 
 ###  Planned
 
