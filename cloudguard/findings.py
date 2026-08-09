@@ -18,15 +18,25 @@ COLORS = {
 
 class Finding:
     def __init__(
-        self, 
-        check: str, 
-        resource: str, 
-        passed: bool, 
-        issue: str = "", 
+        self,
+        finding_id:Optional[str]=None,
+        risk_score:Optional[float]=None,
+        impact:Optional[str]="",
+        evidence:Optional[dict[str,Any]]=None,
+        remediation: Optional[str] = "",
+        check: Optional[str]="", 
+        resource: Optional[str]="", 
+        passed: Optional[bool]=True, 
+        issue: Optional[str] = "", 
         recommendation: str = "",
         severity: Optional[str] = "HIGH", 
         category: Optional[str] = "GENERAL"
     ):
+        self.finding_id=finding_id
+        self.risk_score=risk_score
+        self.impact=impact
+        self.evidence=evidence or{}
+        self.remediation=remediation
         self.check = check
         self.resource = resource
         self.passed = passed
@@ -68,11 +78,16 @@ class Finding:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
+            "finding_id":self.finding_id,
+            "risk_score":self.risk_score,
+            "impact":self.impact,
+            "evidence":self.evidence,
+            "remediation":self.remediation,
             "check": self.check,
             "category": self.category,
             "resource": self.resource,
             "passed": self.passed,
             "severity": self.severity if not self.passed else "None",
             "issue": self.issue if not self.passed else "Secure and compliant",
-            "recommendation": self.recommendation if not self.passed else "No action required"
+            "recommendation":self.recommendation if not self.passed else "No action required"
         }
