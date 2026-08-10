@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-
+from cloudguard.risk import RiskScorer
 COLORS = {
     "BLUE": "\033[94m",           # Used for Resource names
     "GREEN": "\033[92m",          # Used for [PASS]
@@ -32,18 +32,21 @@ class Finding:
         severity: Optional[str] = "HIGH", 
         category: Optional[str] = "GENERAL"
     ):
-        self.finding_id=finding_id
-        self.risk_score=risk_score
-        self.impact=impact
-        self.evidence=evidence or{}
-        self.remediation=remediation
         self.check = check
         self.resource = resource
         self.passed = passed
         self.issue = issue
-        self.recommendation = recommendation
         self.severity = severity
         self.category = category
+        self.finding_id=finding_id
+        self.impact=impact
+        self.evidence=evidence or{}
+        self.remediation=remediation
+        self.recommendation = recommendation
+        if risk_score is not None:
+            self.risk_score=risk_score
+        else:
+            self.risk_score=RiskScorer.score(self)
 
     def __str__(self):
         if self.passed:
@@ -82,12 +85,13 @@ class Finding:
             "risk_score":self.risk_score,
             "impact":self.impact,
             "evidence":self.evidence,
-            "remediation":self.remediation,
             "check": self.check,
             "category": self.category,
             "resource": self.resource,
             "passed": self.passed,
             "severity": self.severity if not self.passed else "None",
             "issue": self.issue if not self.passed else "Secure and compliant",
-            "recommendation":self.recommendation if not self.passed else "No action required"
+            "recommendation":self.recommendation if not self.passed else "No action required",
+            "remediation":self.remediation if not self.passed else ""
+        
         }

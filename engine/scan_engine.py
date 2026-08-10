@@ -71,9 +71,17 @@ class ScanEngine:
                         recommendation = getattr(f, 'recommendation', '')
 
                         if not passed:
-                            print(f"  ↳ {COLORS['RED']}[{severity}]{COLORS['RESET']} {check_name}")
-                            print(f"      {COLORS['YELLOW']}ISSUE:{COLORS['RESET']} {issue}")
-                            print(f"      {COLORS['GREEN']}FIX ->{COLORS['RESET']} {recommendation}")
+                            risk_score=getattr(f,"risk_score",None)
+                            
+                            print(f"  ↳ {COLORS['RED']}[{severity}]{COLORS['RESET']} "
+                                f"{check_name}"
+                                )
+                            if risk_score is not None:
+                                print(f"    Risk Score: {risk_score:.1f}/10"    
+                                )
+                            print(f"  {COLORS["YELLOW"]}ISSUE:{COLORS['RESET']} {issue}")
+                            print(f"  {COLORS['GREEN']}FIX ->{COLORS['RESET']} {recommendation}")
+                        
                         else:
                             msg = issue if issue else "Secure and compliant"
                             print(f"  ↳ {COLORS['GREEN']}[PASS]{COLORS['RESET']} {check_name}: {msg}")
