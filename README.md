@@ -52,6 +52,7 @@ CloudGuard is currently under active development.
 - GitHub Actions CI
 - Improved HTML Reports
 - IAM_user_mfa
+- Implemented Well individual and total risk score for better Risk calculations
 
 ###  In Progress
 
