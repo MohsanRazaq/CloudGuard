@@ -55,13 +55,12 @@ CloudGuard is currently under active development.
 - Implemented Well individual and total risk score for better Risk calculations
 
 ###  In Progress
-
+- IAM Security Assessment
 - Advanced Security Scoring
 - Additional Unit Tests
 
 ###  Planned
 
-- IAM Security Assessment
 - CloudTrail Validation
 - EC2 Security Checks
 - Security Group Analysis
