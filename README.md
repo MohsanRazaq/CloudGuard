@@ -53,11 +53,8 @@ CloudGuard is currently under active development.
 - Improved HTML Reports
 - IAM_user_mfa
 - Implemented Well individual and total risk score for better Risk calculations
-
-###  In Progress
-- IAM Security Assessment
-- Advanced Security Scoring
-- Additional Unit Tests
+### In Progress
+- VPC Structure
 
 ###  Planned
 
@@ -65,8 +62,6 @@ CloudGuard is currently under active development.
 - EC2 Security Checks
 - Security Group Analysis
 - EBS Encryption Checks
-- Azure Support
-- Google Cloud Support
 
 ##  Features
 
