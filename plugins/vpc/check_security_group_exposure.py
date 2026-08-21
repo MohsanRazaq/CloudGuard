@@ -62,13 +62,30 @@ class Plugin(PluginInterface):
                 # get all cidrs
                 ipv4_sources=[r.get("CidrIp") for r in rule.get("IpRanges",[])]
                 ipv6_sources=[r.get("CidrIpv6") for r in rule.get("Ipv6Ranges",[])]
-                is_public='0.0.0.0/0' in ipv4_sources or '::/0' in ipv6_sources
+                is_ipv4_public='0.0.0.0/0' in ipv4_sources
+                is_ipv6_public='::/0' in ipv6_sources
+
                 is_all_traffic=ip_protocol=='-1'
-                matched_ports=[]
-                if ip_protocol=='tcp' and from_port is not None and to_port is not None:
-                    matched_ports=[p for p in PORTS if  from_port<=p<=to_port]
-                if is_public and (is_all_traffic or matched_ports):
-                    
+
+
+                if is_ipv4_public and (is_all_traffic):
+
+                    findings.append(
+                        Finding(
+
+                            check="Security Group Exposure",
+                            category="VPC",
+                            resource=f"SecurityGroup: {sg_id} [{sg_name}]",
+                            passed=False,
+                            severity="CRITICAL",
+                            issue=f"Entire inbound IPv4 space and  all protocols",
+                            recommendation=""" 0.0.0.0/0->-1
+                            -Delete it immediately—restrict traffic strictly to required ports (443/80)
+                            -Lock down management access (SSH/RDP) to your VPN or private IPs
+                            -Terminate public traffic behind a load balancer""" ))
+
+                if is_ipv6_public and (is_all_traffic):
+
                     findings.append(
                         Finding(
                             check="Security Group Exposure",
@@ -76,13 +93,68 @@ class Plugin(PluginInterface):
                             resource=f"SecurityGroupId: {sg_id} [{sg_name}]",
                             passed=False,
                             severity="CRITICAL",
-                            issue=f"Exposed PORTS {matched_ports if not is_all_traffic else 'All ports 0-65635'}",
-                            recommendation="Restrict inbound SSH access to trusted source IPs and avoid exposing port 22 to 0.0.0.0/0 or ::/0 unless required",
-                            ))
-                        
-            
+                            issue=f"Entire IPv6 space  and  all protocols",
+                            recommendation=""" ::/0 ->-1
+                            -Delete immediately
+                            -Apply the same strict per-port rules
+                            -Block direct global inbound routing to backend resources using Egress-Only -Internet -Gateways
+                            -Eliminate untracked dual-stack exposure
+                            """))
+                matched_ports=[]
+                if ip_protocol=='tcp' and from_port is not None and to_port is not None:
+                    if is_ipv4_public or is_ipv6_public:
+                        matched_ports=[ p for p  in PORTS if from_port <= p <= to_port]
+
+                for port in matched_ports:
+                    if port in [3306,5432,1433,6379]:
+                        findings.append(Finding(
+                            check="Security Group Exposure",
+                            category="VPC",
+                            resource=f"SecurityGroupId: {sg_id} [{sg_name}]",
+                            passed=False,
+                            severity="CRITICAL",
+                            issue=f"Public database access [Port:{port}]",
+                            recommendation=f""" 0.0.0.0/0 → Database
+                            -Remove it immediately
+                            -Place the database in a private subnet
+                            -Restrict ingress strictly to your application tier's security group or internal -CIDR (port 3306/5432) with no public IP assigned
+                            """))
+                    elif port in [22,3389]:
+                        findings.append(Finding(
+                            check="Security Group Exposure",
+                            category="VPC",
+                            resource=f"SecurityGroupId: {sg_id} [{sg_name}]",
+                            passed=False,
+                            severity="CRITICAL",
+                            issue=f" Public administrative access [Port:{port}]",
+                            recommendation=f""" 0.0.0.0/0 → Port {port}
+                            -Delete public access immediately to prevent automated brute-force
+                            -Credential stuffing
+                            -Zero-day exploits on your administrative interfaces.
+                            """,))
+                    else:
+                        # by default
+                        pass_status=False
+                        issue_status=''
+                        severity_status=''
+                        if port==80:
+                            pass_status=False
+                            issue_status=f'Common public application endpoint [Port:{port}]'
+                            severity_status='LOW'
+                        if port==443:
+                            pass_status=True
+                            issue_status='No Security Group misconfiguration detected by this rule'
+                            severity_status=''
+
+                        findings.append(Finding(
+                            check="Security Group Exposure",
+                            category="VPC",
+                            resource=f"SecurityGroupId: {sg_id} [{sg_name}]",
+                            passed=pass_status,
+                            severity=severity_status,
+                            issue=issue_status,
+                            recommendation=f""" 0.0.0.0/0 → Port {port}
+                            -No Action Needed
+                            """,))
         return findings
 
-                        
-                                
-    
