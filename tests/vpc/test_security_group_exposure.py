@@ -30,7 +30,7 @@ def test_public_ssh_is_detected():
     plugin = Plugin()
 
     # Act
-    findings = plugin.get_all_security_groups(fake_ec2)
+    findings =plugin.get_all_security_groups(fake_ec2)
 
     # Assert
     assert len(findings) == 1
@@ -41,7 +41,6 @@ def test_public_ssh_is_detected():
 def test_private_ssh_is_not_public_exposure():
     # Arrange
     fake_ec2 = MagicMock()
-
     fake_ec2.describe_security_groups.return_value = {
         "SecurityGroups": [
             {
@@ -63,10 +62,7 @@ def test_private_ssh_is_not_public_exposure():
     }
 
     plugin = Plugin()
-
     # Act
     findings = plugin.get_all_security_groups(fake_ec2)
-
     # Assert
-
     assert findings==[]

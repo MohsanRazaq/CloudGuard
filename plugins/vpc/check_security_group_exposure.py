@@ -1,6 +1,6 @@
 from plugin_manager import PluginInterface
 from cloudguard.findings import Finding
-from cloudguard.constants import PORTS
+from cloudguard.constants import PORTS, ADMIN_PORTS,DATABASE_PORTS,PUBLIC_WEB_PORTS
 from rich import print
 
 
@@ -106,7 +106,7 @@ class Plugin(PluginInterface):
                         matched_ports=[ p for p  in PORTS if from_port <= p <= to_port]
 
                 for port in matched_ports:
-                    if port in [3306,5432,1433,6379]:
+                    if port in DATABASE_PORTS:
                         findings.append(Finding(
                             check="Security Group Exposure",
                             category="VPC",
@@ -119,7 +119,7 @@ class Plugin(PluginInterface):
                             -Place the database in a private subnet
                             -Restrict ingress strictly to your application tier's security group or internal -CIDR (port 3306/5432) with no public IP assigned
                             """))
-                    elif port in [22,3389]:
+                    elif port in ADMIN_PORTS:
                         findings.append(Finding(
                             check="Security Group Exposure",
                             category="VPC",
@@ -137,15 +137,15 @@ class Plugin(PluginInterface):
                         pass_status=False
                         issue_status=''
                         severity_status=''
-                        if port==80:
-                            pass_status=False
-                            issue_status=f'Common public application endpoint [Port:{port}]'
-                            severity_status='LOW'
-                        if port==443:
-                            pass_status=True
-                            issue_status='No Security Group misconfiguration detected by this rule'
-                            severity_status=''
-
+                        if port in PUBLIC_WEB_PORTS:
+                            if port ==80:
+                                pass_status=False
+                                issue_status=f'Common public application endpoint [Port:{port}]'
+                                severity_status='LOW'
+                            else:
+                                pass_status=True
+                                issue_status='No Security Group misconfiguration detected by this rule'
+                                severity_status=''
                         findings.append(Finding(
                             check="Security Group Exposure",
                             category="VPC",
