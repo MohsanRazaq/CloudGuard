@@ -22,7 +22,7 @@ Instead of overwhelming users with raw API responses, CloudGuard presents:
 - Scan summaries
 - JSON reports for automation
 
-##  Project Status
+## Project Status
 
 CloudGuard is currently under active development.
 
@@ -51,17 +51,67 @@ CloudGuard is currently under active development.
 - Pytest Test Suite
 - GitHub Actions CI
 - Improved HTML Reports
-- IAM_user_mfa
-- Implemented Well individual and total risk score for better Risk calculations
-### In Progress
-- VPC Structure
+- Individual and total risk scoring
+- VPC security assessment foundation
+- VPC public subnet exposure check
+- VPC Security Group exposure check
 
-###  Planned
+### VPC Security Assessment
+
+The VPC module is currently being expanded with:
+
+- VPC discovery
+- Public subnet exposure analysis
+- Security Group exposure analysis
+- Network ACL analysis
+- IPv4 and IPv6 public-source detection
+- NACL rule-number evaluation
+- Inbound ALLOW/DENY evaluation
+- Protocol and port classification
+
+Network ACL analysis is still under development and is being validated against AWS NACL rule-evaluation behavior before final Finding integration and complete automated test coverage.
+
+### Planned
 
 - CloudTrail Validation
 - EC2 Security Checks
-- Security Group Analysis
 - EBS Encryption Checks
+- Multi-Region Scanning
+- Multi-Account Support
+- Azure Support
+- Google Cloud Platform Support
+
+
+# Current Security Checks
+
+| Check | Status |
+|---|---|
+| Bucket Versioning | done|
+| Bucket Encryption | done |
+| Bucket ACL Review | done |
+| Public Access Block | done |
+| Bucket Logging | done |
+| Bucket Policy | done |
+| IAM MFA Audit | done |
+| IAM Access Key Audit | done |
+| Security Score | done |
+| JSON Report | done |
+| CLI Summary | done |
+| VPC Discovery | done |
+| Public Subnet Exposure | Done|
+| Security Group Exposure | Done |
+| Network ACL Analyzer | In Progress |
+
+
+# Project Metrics
+
+- Programming Language: Python
+- Cloud Provider: AWS
+- Services Supported: S3, IAM, VPC
+- Architecture: Plugin-Based Modular
+- Report Formats: CLI, HTML, JSON
+- Testing: Pytest + GitHub Actions CI
+- Security Checks: 15+
 
 ##  Features
 
@@ -69,12 +119,12 @@ CloudGuard is currently under active development.
 
 CloudGuard currently performs automated security assessments for Amazon S3 buckets, including:
 
-- ✅ Bucket Versioning validation
-- ✅ Server-Side Encryption verification
-- ✅ Bucket ACL (Access Control List) review
-- ✅ Public Access Block validation
-- ✅ Bucket Policy analysis
-- ✅ Server Access Logging verification
+-  Bucket Versioning validation
+-  Server-Side Encryption verification
+- Bucket ACL (Access Control List) review
+- Public Access Block validation
+-  Bucket Policy analysis
+-  Server Access Logging verification
 
 ---
 
@@ -258,7 +308,7 @@ CloudGuard is built around several engineering principles:
 - Reusable Finding model
 - Configurable scan execution
 
-# 🚀 Quick Start
+#  Quick Start
 
 ## Prerequisites
 
@@ -456,7 +506,7 @@ The final score determines the overall risk level:
 The score is capped at a minimum of 0 — a resource with many critical
 findings will show as 0/100 rather than a negative number.
 
-## ✅ Tested Environment
+##  Tested Environment
 
 | Component | Version |
 |-----------|---------|
@@ -465,7 +515,7 @@ findings will show as 0/100 rather than a negative number.
 | boto3 | Latest |
 | AWS CLI | v2 |
 
-# 📂 Project Structure
+#  Project Structure
 
 ```text
 CloudGuard/
@@ -624,15 +674,16 @@ CloudGuard exports machine-readable JSON reports for automation and integration.
 
 | Check | Status |
 |--------|--------|
-| Bucket Versioning | ✅ |
-| Bucket Encryption | ✅ |
-| Bucket ACL Review | ✅ |
-| Public Access Block | ✅ |
-| Bucket Logging | ✅ |
-| Bucket Policy | ✅ |
-| Security Score | ✅ |
-| JSON Report | ✅ |
-| CLI Summary | ✅ |
+| Bucket Versioning
+| Bucket Encryption 
+| Bucket ACL Review 
+| Public Access Block
+| Bucket Logging 
+| Bucket Policy 
+| Security Score 
+| JSON Report 
+| CLI Summary 
+
 
 #  Project Metrics
 
