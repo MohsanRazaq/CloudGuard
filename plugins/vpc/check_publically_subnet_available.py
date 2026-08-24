@@ -83,7 +83,7 @@ class Plugin(PluginInterface):
                                     category="VPC",
                                     resource=f"SubnetId: {subnet_id} RouteTableId: {route_table_id}",
                                     passed=False,
-                                    issue=f''' Subnet: [{subnet_id}] is  fully exposed to public IP auto-assignment''',
+                                    issue=f''' Subnet: [{subnet_id}] has a route to an Internet Gateway and enables automatic public IPv4 assignment''',
                                     recommendation='''
                                     Disable auto-assign public IP by setting MapPublicIpOnLaunch to False
                                     Move backend services/databases to a private subnet routed to a NAT Gateway
