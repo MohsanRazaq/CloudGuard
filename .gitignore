@@ -27,10 +27,9 @@ logs/
 cloudguard_report.json
 cloudguard_report.json
 run_mock_aws.py
-cloudguard_report.html
-cloudguard_report.json
-cloudguard_report.html
+report.html
 cloudguard_report.json
 
 docker-compose.yml
 aws_wrapper.py
+.gitignore

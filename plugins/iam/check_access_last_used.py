@@ -64,7 +64,7 @@ class Plugin(PluginInterface):
                     key_data = usage_response.get('AccessKeyLastUsed', {})
                     last_used_date = key_data.get('LastUsedDate')
 
-                    resource_id = f"User: {username} | Key: {key_id}"
+                    resource_id = f"User: {username} "
 
                     if not last_used_date:
                         findings.append(
