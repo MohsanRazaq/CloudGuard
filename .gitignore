@@ -33,3 +33,7 @@ cloudguard_report.json
 docker-compose.yml
 aws_wrapper.py
 .gitignore
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+Infrastructure/terraform/.terraform.lock.hcl
