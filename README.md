@@ -1,726 +1,786 @@
-![Tests](https://github.com/MohsanRazaq/CloudGuard/actions/workflows/tests.yml/badge.svg)
-#  CloudGuard
+# CloudGuard
 
-> An extensible cloud security scanner for identifying cloud misconfigurations and generating actionable security reports.
+[![Tests](https://github.com/MohsanRazaq/CloudGuard/actions/workflows/tests.yml/badge.svg)](https://github.com/MohsanRazaq/CloudGuard/actions)
 
-**Current Provider:** Amazon Web Services (AWS)  
-**Current Services:** Amazon S3, AWS IAM, Dynamic Plugin Engine
+> **A modular AWS cloud security scanner that discovers common misconfigurations, evaluates risk, and produces actionable security findings.**
 
-CloudGuard is an open-source cloud security assessment tool designed to help developers, cloud engineers, and security professionals discover insecure cloud configurations before deployment. The project currently focuses on Amazon S3 security assessments and is built with a modular architecture that can be extended to additional AWS services and other cloud providers in future releases.
+CloudGuard is a hands-on **Cloud Security Posture Management (CSPM) prototype** built with Python, boto3, and AWS APIs.
+
+The project is designed to understand how cloud security tooling works internally:
+
+**resource discovery → security checks → findings → risk scoring → reporting**
+
+Current AWS coverage includes **S3, IAM, and VPC**, with a plugin-based architecture designed for future expansion.
+
+---
+
+## Table of Contents
+
+- [What CloudGuard Does](#what-cloudguard-does)
+- [Why CloudGuard](#why-cloudguard)
+- [Current Capabilities](#current-capabilities)
+- [Architecture](#architecture)
+- [Dynamic Plugin System](#dynamic-plugin-system)
+- [How a Scan Works](#how-a-scan-works)
+- [Security Checks](#security-checks)
+- [Risk Scoring](#risk-scoring)
+- [Infrastructure Lab](#infrastructure-lab)
+- [Project Structure](#project-structure)
+- [Quick Start](#quick-start)
+- [AWS Permissions](#aws-permissions)
+- [Testing](#testing)
+- [Example Findings](#example-findings)
+- [Reports](#reports)
+- [Screenshots](#screenshots)
+- [Roadmap](#roadmap)
+- [Security Notes](#security-notes)
+- [Why I Built CloudGuard](#why-i-built-cloudguard)
+
+---
+
+## What CloudGuard Does
+
+CloudGuard connects to AWS through **boto3**, discovers cloud resources, runs independent security checks, converts failed checks into standardized findings, calculates risk, and generates reports.
+
+```text
+                         AWS Account
+                              │
+                              │ boto3 / AWS APIs
+                              ▼
+                    ┌─────────────────────┐
+                    │     CloudGuard      │
+                    │    Scan Engine      │
+                    └──────────┬──────────┘
+                               │
+             ┌─────────────────┼─────────────────┐
+             ▼                 ▼                 ▼
+        ┌─────────┐       ┌─────────┐       ┌─────────┐
+        │   S3    │       │   IAM   │       │   VPC   │
+        │ Scanner │       │ Scanner │       │ Plugins │
+        └────┬────┘       └────┬────┘       └────┬────┘
+             │                 │                 │
+             └─────────────────┼─────────────────┘
+                               ▼
+                       ┌───────────────┐
+                       │   Findings    │
+                       │ + Severity    │
+                       └───────┬───────┘
+                               ▼
+                       ┌───────────────┐
+                       │ Risk Scoring  │
+                       └───────┬───────┘
+                               ▼
+                 ┌─────────────┼─────────────┐
+                 ▼             ▼             ▼
+              CLI Output    HTML Report   JSON Report
+```
+
+---
 
 ## Why CloudGuard?
 
-Cloud environments are powerful but can become difficult to secure as infrastructure grows. Simple configuration mistakes—such as disabled encryption, missing versioning, or publicly accessible buckets—can lead to security incidents, compliance violations, and unnecessary audit costs.
+Cloud environments can become difficult to secure as infrastructure grows. A small configuration mistake can create significant exposure.
 
-CloudGuard helps identify these issues automatically by scanning cloud resources and producing clear, actionable security findings.
+CloudGuard currently looks for conditions such as:
 
-Instead of overwhelming users with raw API responses, CloudGuard presents:
+- Publicly exposed network resources
+- Security Groups allowing unrestricted traffic
+- Network ACLs allowing unrestricted inbound traffic
+- IAM users without MFA
+- Weak S3 configuration
+- Disabled S3 versioning
+- Missing server access logging
 
-- Actionable security findings
-- Risk-based severity levels
-- Security score
-- Scan summaries
-- JSON reports for automation
+The goal is to turn raw AWS configuration into security information that is easier to understand and prioritize.
 
-## Project Status
+### From AWS API data to a security finding
 
-CloudGuard is currently under active development.
+```text
+AWS API response
+       │
+       ▼
+Security logic
+       │
+       ▼
+Standardized Finding
+       │
+       ▼
+Severity
+       │
+       ▼
+Risk score
+       │
+       ▼
+Actionable report
+```
 
-### Implemented
+---
 
-- Dynamic Plugin Engine
-- Automatic Plugin Discovery
-- Plugin Registry
-- Plugin Interface Architecture
-- AWS S3 Security Assessment
-- Bucket Versioning Check
-- Bucket Encryption Check
-- Bucket ACL Review
-- Bucket Policy Analysis
-- Public Access Block Validation
-- Server Access Logging Check
-- AWS IAM Security Assessment
-- IAM MFA Audit
-- IAM Access Key Audit
-- Security Score Calculation
-- Risk Classification
-- HTML Report Generator
-- JSON Report Export
-- Colorized CLI Output
-- Streamlit Dashboard
-- Pytest Test Suite
-- GitHub Actions CI
-- Improved HTML Reports
-- Individual and total risk scoring
-- VPC security assessment foundation
-- VPC public subnet exposure check
-- VPC Security Group exposure check
+# Current Capabilities
 
-### VPC Security Assessment
+## AWS Services
 
-The VPC module is currently being expanded with:
+| AWS Service | Current Coverage |
+|---|---|
+| **S3** | Bucket security assessment |
+| **IAM** | MFA and access-key security assessment |
+| **VPC** | Network exposure assessment |
+
+## S3 Security Checks
+
+- Bucket versioning
+- Server-side encryption
+- Bucket ACL configuration
+- Public Access Block
+- Bucket policy analysis
+- Server access logging
+
+## IAM Security Checks
+
+- IAM user MFA status
+- IAM access-key usage / last-used information
+
+## VPC Security Checks
 
 - VPC discovery
-- Public subnet exposure analysis
-- Security Group exposure analysis
+- Public subnet exposure
+- Security Group exposure
 - Network ACL analysis
-- IPv4 and IPv6 public-source detection
+- IPv4 public-source detection
+- IPv6 public-source detection
+- Protocol and port classification
 - NACL rule-number evaluation
 - Inbound ALLOW/DENY evaluation
-- Protocol and port classification
 
-Network ACL analysis is still under development and is being validated against AWS NACL rule-evaluation behavior before final Finding integration and complete automated test coverage.
+## Platform Features
 
-### Planned
+- Dynamic plugin discovery
+- Plugin registry
+- Common plugin interface
+- Modular security checks
+- Standardized finding objects
+- Severity classification
+- Risk scoring
+- CLI reporting
+- HTML reporting
+- JSON reporting
+- Configurable scan modules
+- Logging
+- Streamlit dashboard
+- Pytest test suite
+- GitHub Actions CI
+- Terraform-based AWS lab infrastructure
 
-- CloudTrail Validation
-- EC2 Security Checks
-- EBS Encryption Checks
-- Multi-Region Scanning
-- Multi-Account Support
-- Azure Support
-- Google Cloud Platform Support
+---
 
+# Architecture
 
-# Current Security Checks
+CloudGuard separates **scanning**, **security logic**, **risk analysis**, and **reporting**.
 
-| Check | Status |
+```mermaid
+flowchart TD
+    A[cloudguard.py] --> B[Configuration Loader]
+    A --> C[Scan Engine]
+    C --> D[Plugin Manager]
+
+    D --> E[S3 Plugins]
+    D --> F[IAM Plugins]
+    D --> G[VPC Plugins]
+
+    E --> H[Finding Model]
+    F --> H
+    G --> H
+
+    H --> I[Risk Engine]
+
+    I --> J[CLI Summary]
+    I --> K[HTML Report]
+    I --> L[JSON Report]
+```
+
+### Core architectural layers
+
+| Layer | Responsibility |
 |---|---|
-| Bucket Versioning | done|
-| Bucket Encryption | done |
-| Bucket ACL Review | done |
-| Public Access Block | done |
-| Bucket Logging | done |
-| Bucket Policy | done |
-| IAM MFA Audit | done |
-| IAM Access Key Audit | done |
-| Security Score | done |
-| JSON Report | done |
-| CLI Summary | done |
-| VPC Discovery | done |
-| Public Subnet Exposure | Done|
-| Security Group Exposure | Done |
-| Network ACL Analyzer | In Progress |
-
-
-# Project Metrics
-
-- Programming Language: Python
-- Cloud Provider: AWS
-- Services Supported: S3, IAM, VPC
-- Architecture: Plugin-Based Modular
-- Report Formats: CLI, HTML, JSON
-- Testing: Pytest + GitHub Actions CI
-- Security Checks: 15+
-
-##  Features
-
-###  Security Assessment
-
-CloudGuard currently performs automated security assessments for Amazon S3 buckets, including:
-
--  Bucket Versioning validation
--  Server-Side Encryption verification
-- Bucket ACL (Access Control List) review
-- Public Access Block validation
--  Bucket Policy analysis
--  Server Access Logging verification
+| **Entry Point** | Starts the CloudGuard scan |
+| **Configuration** | Controls enabled scan modules |
+| **Scan Engine** | Coordinates the scanning process |
+| **Plugin Manager** | Discovers and loads security plugins |
+| **AWS Scanners** | Handle AWS sessions and resource discovery |
+| **Security Plugins** | Perform individual security checks |
+| **Finding Model** | Gives every result a consistent structure |
+| **Risk Engine** | Converts findings into risk scores |
+| **Reporting** | Presents results through CLI, HTML, and JSON |
+| **Dashboard** | Provides a visual interface for scan results |
 
 ---
 
-###  Security Reporting
+# Dynamic Plugin System
 
-After each scan, CloudGuard generates:
+A key design decision is that the core scan engine should not need to know every individual security check.
 
-- Risk-weighted Security Score
-- Overall Risk Level (Low / Medium / High)
-- Colorized terminal output
-- Bucket-wise security findings
-- Severity classification (Critical, High, Medium, Low)
-- Actionable remediation recommendations
-- JSON report export for automation and further analysis
+Plugins follow a common interface and can be discovered and registered by the plugin manager.
 
----
-
-###  Modular Architecture
-
-CloudGuard is designed to be easily extended.
----
-                 CLI / Dashboard
-                        │
-                        ▼
-                 Scan Engine
-                        │
-                        ▼
-              Plugin Manager
-                        │
-      ┌─────────────────┼────────────────ti─┐
-      ▼                 ▼                 ▼
-   S3 Plugins      IAM Plugins      Future Plugins
-      │                 │
-      └────────────┬────┘
-                   ▼
-            Finding Engine
-                   │
-                   ▼
-           HTML / JSON / CLI
-
-           ---
-
-Current modules include:
-
-- AWS Session Management
-- S3 Resource Discovery
-- Independent Security Check Modules
-- Findings Engine
-- Reporting Engine
-- Logging Utilities
-- Configuration Loader
-
-This modular architecture allows new security checks and cloud services to be added with minimal code changes.
-
----
-### Plugin Engine
-
-- Dynamic Plugin Discovery
-- Automatic Plugin Registration
-- Plugin Interface
-- Plugin Registry
-- Runtime Plugin Loading
-- Service-based Plugin Organization
-
-
-##  Dynamic Plugin System
-
-CloudGuard now uses a dynamic plugin architecture that automatically discovers and loads security plugins at runtime.
-
-Every plugin implements a common `PluginInterface`, allowing new security checks to be added without modifying the core scan engine.
-
-### Benefits
-
-- Automatic plugin discovery
-- Extensible architecture
-- Decoupled scan engine
-- Easy feature development
-- Independent security modules
-- Future support for AWS, Azure and GCP plugins
-
----
-
-
-###  Configuration
-
-CloudGuard supports configurable scanning through `config.json`.
-
-Current configurable scan modules include:
-
-- `scan_s3`
-- `scan_iam`
-- `scan_vpc`
-
-Additional modules will be supported as development continues.
-
----
-
-###  Future Expansion
-
-CloudGuard is being developed as a multi-cloud security assessment platform.
-
-Planned support includes:
-
-- AWS IAM
-- AWS CloudTrail
-- AWS EC2
-- AWS Security Groups
-- AWS EBS
-- AWS KMS
-- Azure
-- Google Cloud Platform (GCP)
-
-##  Architecture
-
-CloudGuard follows a modular architecture where each component has a single responsibility. This makes the scanner easy to maintain, test, and extend with additional cloud services and security checks.
-
-```
-                   +----------------------+
-                   |      CloudGuard      |
-                   |    (cloudguard.py)   |
-                   +----------+-----------+
-                              |
-             +----------------+----------------+
-             |                                 |
-             ▼                                 ▼
-    +----------------+               +----------------+
-    |  AWS Session   |               | Configuration  |
-    | (boto3 Client) |               |  config.json   |
-    +-------+--------+               +----------------+
-            |
-            ▼
-    +----------------------+
-    |  Resource Discovery  |
-    |     S3 Buckets       |
-    +----------+-----------+
-               |
-               ▼
-    +---------------------------------------------+
-    |           Security Check Engine             |
-    +---------------------------------------------+
-      |        |         |        |        |       |
-      ▼        ▼         ▼        ▼        ▼       ▼
- Version   Encryption   ACL   Public   Logging  Policy
-                              Block
-
-               |
-               ▼
-       +------------------+
-       | Finding Objects  |
-       +------------------+
-               |
-               ▼
-      +---------------------+
-      | Reporting Engine    |
-      +---------------------+
-        |               |
-        ▼               ▼
- CLI Summary      JSON Report
+```text
+                    Plugin Manager
+                          │
+              ┌───────────┼───────────┐
+              ▼           ▼           ▼
+           S3 Plugin   IAM Plugin   VPC Plugin
+              │           │           │
+              ▼           ▼           ▼
+           S3 Check    IAM Check    VPC Check
+              │           │           │
+              └───────────┼───────────┘
+                          ▼
+                       Finding
 ```
 
-### Core Components
+### Why this matters
 
-| Module | Responsibility |
-|---------|----------------|
-| **AWS Session** | Creates authenticated boto3 clients |
-| **Resource Discovery** | Discovers AWS resources for scanning |
-| **Security Checks** | Executes independent security validation modules |
-| **Finding Engine** | Represents scan results in a consistent format |
-| **Reporting Engine** | Generates terminal summaries and JSON reports |
-| **Logger** | Stores scan logs for auditing and troubleshooting |
-| **Configuration Loader** | Enables or disables scan modules using `config.json` |
+Adding a new security check should primarily involve adding a new plugin rather than rewriting the core orchestration logic.
 
-### Design Principles
+This provides:
 
-CloudGuard is built around several engineering principles:
+- Lower coupling between components
+- Easier testing
+- Easier feature development
+- Independent security checks
+- A foundation for additional AWS services
+- A path toward multi-cloud support
 
-- Modular architecture
-- Single Responsibility Principle (SRP)
-- Extensible security check framework
-- Separation of scanning and reporting logic
-- Reusable Finding model
-- Configurable scan execution
+---
 
-#  Quick Start
+# How a Scan Works
+
+```mermaid
+flowchart LR
+    A[Start Scan] --> B[Load Config]
+    B --> C[Create AWS Session]
+    C --> D[Discover Resources]
+    D --> E[Run Security Plugins]
+    E --> F[Generate Findings]
+    F --> G[Calculate Risk]
+    G --> H[Generate Reports]
+```
+
+### Step-by-step
+
+**1. Load configuration**  
+CloudGuard reads enabled scan modules from `config.json`.
+
+**2. Create AWS session**  
+CloudGuard uses boto3 and the standard AWS credential chain to authenticate with AWS.
+
+**3. Discover resources**  
+Relevant scanners discover resources such as S3 buckets, IAM users, VPCs, subnets, Security Groups, and Network ACLs.
+
+**4. Run security checks**  
+Each plugin evaluates a specific security property.
+
+**5. Generate findings**  
+A failed check becomes a structured finding containing information such as the resource, issue, severity, and recommendation.
+
+**6. Calculate risk**  
+Findings are aggregated into a security score and overall risk level.
+
+**7. Generate reports**  
+Results can be displayed in the terminal and exported as HTML or JSON.
+
+---
+
+# Security Checks
+
+| Service | Check | Status |
+|---|---|---|
+| S3 | Bucket Versioning | ✅ Implemented |
+| S3 | Encryption | ✅ Implemented |
+| S3 | ACL Review | ✅ Implemented |
+| S3 | Public Access Block | ✅ Implemented |
+| S3 | Bucket Policy | ✅ Implemented |
+| S3 | Server Access Logging | ✅ Implemented |
+| IAM | MFA Audit | ✅ Implemented |
+| IAM | Access Key Audit | ✅ Implemented |
+| VPC | VPC Discovery | ✅ Implemented |
+| VPC | Public Subnet Exposure | ✅ Implemented |
+| VPC | Security Group Exposure | ✅ Implemented |
+| VPC | Network ACL Analysis | ✅ Implemented |
+
+---
+
+# Risk Scoring
+
+CloudGuard converts security findings into a simple security posture score.
+
+The current model starts at **100** and deducts points according to finding severity.
+
+| Severity | Deduction |
+|---|---:|
+| Critical | 25 |
+| High | 10 |
+| Medium | 5 |
+| Low | 2 |
+
+The score cannot fall below `0`.
+
+### Overall risk level
+
+| Score | Risk Level |
+|---:|---|
+| 90–100 | LOW |
+| 70–89 | MEDIUM |
+| < 70 | HIGH |
+
+> The scoring model is intentionally simple at this stage. Future versions can incorporate resource criticality, exploitability, finding frequency, and service-specific weighting.
+
+---
+
+# Infrastructure Lab
+
+CloudGuard includes a Terraform-based AWS lab under:
+
+```text
+Infrastructure/
+└── terraform/
+```
+
+The current Terraform configuration provides the foundation for a controlled AWS security-testing environment, including:
+
+- VPC
+- Internet Gateway
+- Public subnet
+- Route table
+- Route table association
+- Security Group
+
+```mermaid
+flowchart TD
+    A[Terraform] --> B[AWS Provider]
+    B --> C[VPC]
+    C --> D[Internet Gateway]
+    C --> E[Public Subnet]
+    C --> F[Route Table]
+    F --> E
+    C --> G[Security Group]
+```
+
+The purpose of this lab is to test CloudGuard against infrastructure with known security conditions rather than relying only on arbitrary AWS resources.
+
+### Infrastructure → Scanner workflow
+
+```text
+Terraform
+   │
+   ▼
+Create Lab Infrastructure
+   │
+   ▼
+Represent known security conditions
+   │
+   ▼
+Run CloudGuard
+   │
+   ▼
+Detect findings
+   │
+   ▼
+Validate scanner behavior
+```
+
+This makes the security scanner development process more repeatable and gives the project an infrastructure-as-code testing foundation.
+
+---
+
+# Project Structure
+
+```text
+CloudGuard/
+│
+├── cloudguard.py                 # Main CLI entry point
+├── plugin_manager.py             # Dynamic plugin discovery/registration
+├── config.json                   # Scan configuration
+├── requirements.txt              # Python dependencies
+│
+├── cloudguard/
+│   ├── aws/
+│   │   ├── session.py            # AWS session/client handling
+│   │   ├── s3_scanner.py         # S3 resource discovery
+│   │   └── iam_scanner.py        # IAM resource discovery
+│   │
+│   ├── findings.py               # Standardized finding model
+│   ├── posture.py                # Security posture handling
+│   ├── risk.py                   # Risk calculation logic
+│   ├── risk_aggregator.py        # Finding/risk aggregation
+│   ├── constants.py              # Shared constants
+│   │
+│   ├── reporting/
+│   │   ├── summary.py            # CLI summary
+│   │   ├── html_exporter.py      # HTML report generation
+│   │   └── json_exporter.py      # JSON report generation
+│   │
+│   └── utils/
+│       ├── config_loader.py      # Configuration loading
+│       └── logger.py             # Logging utilities
+│
+├── plugins/
+│   ├── s3/                       # S3 security plugins
+│   ├── iam/                      # IAM security plugins
+│   └── vpc/                      # VPC security plugins
+│
+├── dashboard/
+│   └── app.py                    # Streamlit dashboard
+│
+├── Infrastructure/
+│   ├── variables.tf              # Terraform input variables
+│   └── terraform/
+│       ├── main.tf
+│       ├── outputs.tf
+│       └── versions.tf
+│
+├── tests/
+│   ├── s3/                       # S3 tests
+│   ├── iam/                      # IAM tests
+│   ├── vpc/                      # VPC tests
+│   ├── test_posture.py
+│   ├── test_risk.py
+│   └── test_risk_aggregator.py
+│
+├── docs/
+│   ├── architecture.md
+│   ├── vpc_security_model.md
+│   └── images/
+│
+└── .github/
+    └── workflows/
+        └── tests.yml             # CI pipeline
+```
+
+---
+
+# Quick Start
 
 ## Prerequisites
 
-Before running CloudGuard, ensure you have:
+- Python 3.10+
+- AWS account
+- AWS CLI
+- AWS credentials with the required read permissions
+- Git
 
-- Python **3.10+**
-- An AWS account
-- AWS CLI configured with valid credentials
-- Internet connection
-
----
-
-## Clone the Repository
+### 1. Clone
 
 ```bash
 git clone https://github.com/MohsanRazaq/CloudGuard.git
 cd CloudGuard
 ```
 
----
+### 2. Create a virtual environment
 
-## Create a Virtual Environment
-
-```bash
-python -m venv .venv
-```
-
-### Linux / macOS
+Linux/macOS:
 
 ```bash
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### Windows
+Windows:
 
 ```powershell
-.venv\Scripts\activate
+python -m venv .venv
+.venv\Scriptsctivate
 ```
 
----
-
-## Install Dependencies
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+### 4. Configure AWS credentials
 
-## Configure AWS Credentials
-## Environment Configuration (LocalStack vs. Real AWS)
-
-CloudGuard supports testing locally via **LocalStack** or scanning a **Live AWS Account** using a single configuration switch in `.env`.
-
-### 1. Create a `.env` File
-Create a `.env` file in the project root directory:
-
-```env
-# Set to 'true' for LocalStack, 'false' for Real AWS
-USE_LOCALSTACK=false
-
-# LocalStack Gateway Endpoint
-LOCALSTACK_ENDPOINT=http://localhost:4566
-
-# Default AWS Region
-AWS_DEFAULT_REGION=us-east-1
-
-Security Notice: Do not place real AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY inside .env to prevent accidental credential leakage in Git repositories
-
-##Execution Modes
-#Scan Live AWS Account
-Export your temporary or IAM credentials directly into your terminal environment, then launch the scan
-```bash
-# Set credentials in environment
-export AWS_ACCESS_KEY_ID="AKIAXXXXXXXXXXXXXXXX"
-export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-export AWS_DEFAULT_REGION="us-east-1"
-
-# Run CloudGuard scan
-python3 cloudguard.py --scan
-```
-```
-#Scan Offline via LocalStack
-
-Ensure your LocalStack Docker container is running, set USE_LOCALSTACK=true in .env, and execute with mock credentials:
-```bash
-# Ensure container is up
-docker ps
-
-# Run scan using LocalStack endpoint
-AWS_ENDPOINT_URL="http://localhost:4566" 
-AWS_ACCESS_KEY_ID="test" 
-AWS_SECRET_ACCESS_KEY="test" 
-python3 cloudguard.py --scan
-```
-```
-CloudGuard uses the default AWS credential chain provided by **boto3**.
-
-If AWS CLI is not configured, run:
+CloudGuard uses boto3's standard AWS credential chain.
 
 ```bash
 aws configure
 ```
 
-Provide:
+Verify the active identity before scanning:
 
-```
-AWS Access Key ID
-AWS Secret Access Key
-Default Region
-Output Format (json)
+```bash
+aws sts get-caller-identity
 ```
 
-CloudGuard automatically uses these credentials during the scan.
+### 5. Configure scan modules
+
+Edit `config.json`:
+
+```json
+{
+    "scan_s3": true,
+    "scan_iam": true,
+    "scan_vpc": true
+}
+```
+
+### 6. Run CloudGuard
+
+```bash
+python3 cloudguard.py --scan
+```
+
+> **Security:** Use a dedicated least-privilege scanning identity where possible. Never commit AWS credentials, secret keys, `.env` files containing credentials, or other secrets to Git.
 
 ---
 
-## Configure Scan Modules
+# AWS Permissions
 
-Edit `config.json` to enable or disable scan modules.
+CloudGuard is designed to **inspect** AWS resources rather than modify them.
+
+The scanner therefore needs read-oriented permissions corresponding to the APIs used by the enabled scanners.
+
+Examples include permissions for:
+
+- S3 bucket discovery and configuration inspection
+- IAM user and access-key inspection
+- VPC resource inspection
+- Security Group inspection
+- Network ACL inspection
+
+The exact permission set depends on the enabled modules and should be kept as narrow as practical.
+
+### Scanner identity vs. Terraform identity
+
+Use separate identities for different purposes:
+
+```text
+                 AWS Account
+                     │
+          ┌──────────┴──────────┐
+          │                     │
+          ▼                     ▼
+   CloudGuard Scanner       Terraform
+   Read-only access         Deployment access
+          │                     │
+          ▼                     ▼
+      Inspect AWS          Create/modify lab
+```
+
+Do not use the CloudGuard scanner identity as a general-purpose infrastructure deployment identity.
+
+---
+
+# Testing
+
+CloudGuard uses **pytest** for automated testing and GitHub Actions for CI.
+
+Run the complete test suite:
+
+```bash
+pytest -v
+```
+
+The repository contains tests for:
+
+- S3 security logic
+- IAM security logic
+- VPC security logic
+- Security posture
+- Risk calculation
+- Risk aggregation
+
+GitHub Actions automatically runs the test suite through CI.
+
+---
+
+# Example Findings
+
+```text
+CLOUDGUARD SECURITY SCAN
+
+S3
+────────────────────────────────────────
+[MEDIUM] Bucket Versioning
+Resource: example-bucket
+Issue: Versioning is disabled
+Recommendation: Enable bucket versioning
+
+IAM
+────────────────────────────────────────
+[HIGH] MFA
+Resource: cloudguard_scanner
+Issue: MFA is not enabled
+Recommendation: Enable MFA for the IAM user
+
+VPC
+────────────────────────────────────────
+[CRITICAL] Security Group Exposure
+Resource: lab_sg
+Issue: Unrestricted inbound traffic detected
+Recommendation: Restrict inbound rules to required sources and ports
+```
+
+The exact findings depend on the AWS environment being scanned.
+
+---
+
+# Reports
+
+CloudGuard can present the same security results through multiple outputs.
+
+```text
+                    Findings
+                       │
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+       Terminal       HTML         JSON
+        Output       Report       Report
+```
+
+### CLI
+
+Immediate human-readable scan results.
+
+### HTML
+
+A richer report for reviewing security posture and findings.
+
+### JSON
+
+Machine-readable output useful for:
+
+- Automation
+- CI/CD integration
+- Dashboards
+- Further analysis
 
 Example:
 
 ```json
 {
-    "scan_s3": true,
-    "scan_iam": false
-}
-```
-
----
-
-## Run CloudGuard
-
-```bash
-python cloudguard.py
-```
-
----
-
-##  Why I Built CloudGuard
-
-CloudGuard was created as a hands-on cloud security project to deepen my understanding of AWS security services and secure software design.
-
-Rather than relying solely on existing security tools, I wanted to build a scanner from scratch to understand how cloud security assessments work internally—from AWS API interactions to finding generation and reporting.
-
-The long-term vision is to evolve CloudGuard into a modular multi-cloud security assessment platform supporting AWS, Azure, and Google Cloud.
-
-## Example Output
-
-```text
-CLOUD GUARD
-
-Running Tasks : scan_s3
-
-------------------------------------------------------------
-S3 SECURITY ASSESSMENT
-------------------------------------------------------------
-
-[RESOURCE] cloudguard-example
-
-↳ [Medium] Versioning
-↳ [PASS] Encryption
-↳ [High] Public Access Block
-↳ [PASS] Bucket ACL
-
-============================================================
-SCAN SUMMARY
-============================================================
-
-Security Score : 82/100
-Risk Level     : MEDIUM
-Buckets Scanned: 5
-```
-## How the Security Score is Calculated
-
-Every scan starts at a perfect score of 100. Points are deducted for each
-failed security check, weighted by severity:
-
-| Severity | Points deducted per finding |
-|----------|------------------------------|
-| Critical | 25 |
-| High     | 10 |
-| Medium   | 5  |
-| Low      | 2  |
-
-The final score determines the overall risk level:
-
-| Score range | Risk level |
-|-------------|------------|
-| 90–100      | LOW RISK |
-| 70–89       | MEDIUM RISK |
-| Below 70    | HIGH RISK |
-
-The score is capped at a minimum of 0 — a resource with many critical
-findings will show as 0/100 rather than a negative number.
-
-##  Tested Environment
-
-| Component | Version |
-|-----------|---------|
-| Python | 3.12 |
-| Ubuntu | 24.04 LTS |
-| boto3 | Latest |
-| AWS CLI | v2 |
-
-#  Project Structure
-
-```text
-CloudGuard/
-├── cloudguard.py
-├── plugin_manager.py
-├── config.json
-├── requirements.txt
-├── cloudguard/
-│   ├── aws/
-│   ├── engine/
-│   ├── reporting/
-│   ├── findings.py
-│   └── utils/
-├── plugins/
-│   ├── s3/
-│   └── iam/
-├── dashboard/
-└── tests/
-```
-
----
-
-## Directory Overview
-
-| Directory | Purpose |
-|-----------|----------|
-| **aws/** | AWS authentication and resource discovery |
-| **security_checks/** | Independent security validation modules |
-| **reporting/** | CLI summaries and report generation |
-| **utils/** | Logging and configuration helpers |
-| **tests/** | Unit tests for security checks |
-| **logs/** | Scan logs |
-| **docs/** | Documentation and screenshots |
-
-#  How CloudGuard Works
-
-CloudGuard follows a simple scanning pipeline.
-
-```
-Start Scan
-    │
-    ▼
-Load Configuration
-    │
-    ▼
-Create AWS Session
-    │
-    ▼
-Discover Resources
-    │
-    ▼
-Execute Security Checks
-    │
-    ▼
-Generate Findings
-    │
-    ▼
-Calculate Security Score
-    │
-    ▼
-Generate Reports
-    │
-    ├── Terminal Report
-    └── JSON Report
-```
-
-Each security check runs independently and returns a standardized `Finding` object.
-
-This modular design allows new security checks and cloud services to be added without modifying the core scanning engine.
-
-
-##  Example JSON Report
-
-```json
-{
   "scan_metadata": {
     "engine": "CloudGuard",
-    "version": "v1.0.0",
-    "timestamp": "2026-07-04 00:57:59",
     "tasks_run": [
-      "scan_s3"
+      "scan_s3",
+      "scan_iam",
+      "scan_vpc"
     ]
   },
   "findings": [
     {
       "check": "Public Access Block",
-      "resource": "cloudguard-learning-bucket-test",
+      "resource": "example-bucket",
       "passed": false,
       "severity": "HIGH",
-      "issue": "Public Access block is incomplete or disabled",
-      "recommendation": "Enable All 4 public Access Block Setting"
+      "issue": "Public access controls are incomplete",
+      "recommendation": "Enable all required Public Access Block settings"
     }
   ]
 }
 ```
 
-CloudGuard exports a complete JSON report that can be integrated with dashboards, CI/CD pipelines, or other automation workflows.
-
-#  Roadmap
-
-## Version 0.2
-
-- [x] HTML Report Generation
-- [-] CSV Report Export
-- [-] Enhanced Risk Scoring Engine
-- [-] Expand Unit Test Coverage
-- [x] Automated Testing with GitHub Actions (CI)
-
-## Version 0.3
-
-- [x] IAM Security Assessment
-- [ ] CloudTrail Security Checks
-- [ ] EC2 Security Assessment
-- [ ] Security Group Analysis
-
-## Version 0.4
-
-- [ ] Multi-Region Scanning
-- [ ] Multi-Account Support
-- [ ] Docker Support
-- [ ] GitHub Actions CI
-
-## Version 1.0
-
-- [ ] Azure Support
-- [ ] Google Cloud Platform Support
-- [x] Plugin System
-- [x] Web Dashboard
-
+---
 
 # Screenshots
 
 ## CloudGuard Scan
 
-Displays discovered resources, security findings, and remediation recommendations.
-
 ![CloudGuard Scan](docs/images/cloudguard_scan.png)
-
----
 
 ## Scan Summary
 
-Displays security score, scan duration, severity breakdown, and overall risk level.
-
 ![Scan Summary](docs/images/scan_summary.png)
-
----
 
 ## JSON Report
 
-CloudGuard exports machine-readable JSON reports for automation and integration.
-
 ![JSON Report](docs/images/json_report.png)
 
-#  Current Security Checks
+---
 
-| Check | Status |
-|--------|--------|
-| Bucket Versioning
-| Bucket Encryption 
-| Bucket ACL Review 
-| Public Access Block
-| Bucket Logging 
-| Bucket Policy 
-| Security Score 
-| JSON Report 
-| CLI Summary 
+# Roadmap
 
+## Current Foundation
 
-#  Project Metrics
+- [x] Dynamic plugin architecture
+- [x] S3 security assessment
+- [x] IAM security assessment
+- [x] VPC security assessment
+- [x] Security Group exposure analysis
+- [x] Network ACL analysis
+- [x] Risk scoring
+- [x] HTML reporting
+- [x] JSON reporting
+- [x] Streamlit dashboard
+- [x] Automated tests
+- [x] GitHub Actions CI
+- [x] Terraform lab foundation
 
-- Programming Language: Python
-- Cloud Provider: AWS
-- Services Supported: Amazon S3,IAM
-- Security Checks: 8+
-- Report Formats: CLI, HTML, JSON
-- Architecture: Plugin-Based Modular
+## Next
 
+- [ ] Expand Terraform lab with additional intentionally vulnerable scenarios
+- [ ] Increase integration-test coverage
+- [ ] CloudTrail security checks
+- [ ] EC2 security checks
+- [ ] EBS encryption checks
+- [ ] KMS security checks
+- [ ] IAM policy analysis
 
-# Next Implementations Quequed:
+## Future
 
- -IAM Checks[5]
- -EC2 checks[5]
+- [ ] Multi-region scanning
+- [ ] Multi-account scanning
+- [ ] CI/CD security scanning
+- [ ] Policy-as-code capabilities
+- [ ] Azure support
+- [ ] Google Cloud Platform support
+- [ ] Unified multi-cloud finding model
 
-#  Contributing
+---
 
-Contributions are welcome!
+# Security Notes
 
-If you'd like to improve CloudGuard:
+CloudGuard is an **assessment tool**, not a replacement for a complete cloud security program.
 
-1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes.
-4. Submit a Pull Request.
+Important considerations:
 
-Bug reports, feature requests, and security suggestions are always appreciated.
+- Findings depend on the permissions available to the scanner identity.
+- A `PASS` means the implemented check did not identify the tested condition; it does not prove that a resource is completely secure.
+- The risk score is a project-specific heuristic, not an industry-standard security rating.
+- Always test infrastructure changes in an appropriate AWS environment.
+- Never commit AWS credentials or secrets to the repository.
+- Review Terraform changes carefully before applying them to an AWS account.
 
-#  License
+---
 
-This project is licensed under the MIT License.
+# Why I Built CloudGuard
 
-#  Acknowledgements
+CloudGuard is being built as a practical cloud-security engineering project.
 
-CloudGuard is built using:
+The purpose is to understand how cloud security tooling actually works by implementing the important pieces instead of treating a security scanner as a black box.
 
-- AWS SDK for Python (boto3)
-- Python
-- AWS Documentation
+The project combines:
+
+- Python development
+- AWS APIs and boto3
+- IAM security
+- Network security
+- Cloud security posture assessment
+- Plugin architecture
+- Risk modeling
+- Automated testing
+- Infrastructure as Code with Terraform
+- Security reporting
+
+The long-term direction is to evolve CloudGuard from an AWS-focused learning project into a more complete, extensible cloud security assessment platform.
+
+---
+
+## Author
+
+**Mohsan Razaq**  
+BS Cyber Security | Cloud Security & Offensive Security
+
+---
+
+## License
+
+See the repository for the current license information.
