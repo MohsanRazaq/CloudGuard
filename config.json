@@ -1,9 +1,0 @@
-{
-    "scan_s3": true,
-    "scan_iam": true,
-    "scan_vpc": false,
-    "plugins":{
-        "S3_bucket_acl_check":true,
-        "S3_bucket_encryption_check":false
-    }
-}
