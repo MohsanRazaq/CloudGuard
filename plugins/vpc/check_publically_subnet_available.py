@@ -21,7 +21,7 @@ class Plugin(PluginInterface):
 
     @property
     def category(self) -> str:
-        return "EC2"
+        return "VPC"
 
     @property
     def supported_services(self) -> list:

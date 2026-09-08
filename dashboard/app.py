@@ -1,134 +1,215 @@
 from datetime import datetime
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
-# CloudGuard Core Imports
-from cloudguard.aws.s3_scanner import list_buckets
 from cloudguard.aws.session import create_session
-from cloudguard.utils.config_loader import load_config
-from plugin_manager import PluginRegistry, load_all_plugins
+from engine.scan_engine import ScanEngine
 
-# Page Setup
+
 st.set_page_config(
-    page_title="CloudGuard Security", page_icon="🛡️", layout="wide"
+    page_title="CloudGuard Security",
+    page_icon="🛡️",
+    layout="wide",
 )
 
-st.title("🛡️ CloudGuard Security Assessment Dashboard")
+st.title("CloudGuard Security Assessment Dashboard")
 st.markdown(
     "Scan and monitor your AWS cloud security configurations in real time."
 )
 
-# Sidebar Configuration
+
+# Sidebar
+
 st.sidebar.header("Scan Setup")
 
-# Load Configuration
-try:
-    config = load_config()
-except Exception:
-    config = {"s3": True, "iam": True}  # Fallback default
+st.sidebar.subheader("Scan Scope")
+st.sidebar.info(
+    "CloudGuard scans S3, IAM, and VPC using the active plugin registry."
+)
 
-st.sidebar.subheader("Tasks Configuration Status")
-for task, enabled in config.items():
-    status = "Enabled" if enabled else "Disabled"
-    st.sidebar.text(f"{task.upper()}: {status}")
+# Scan Execution
 
-# Trigger Scan Execution
-if st.sidebar.button("🚀 Run Cloud Security Scan", type="primary"):
+if st.sidebar.button(" Run Cloud Security Scan", type="primary"):
+
     with st.spinner("Scanning AWS Environment. Please wait..."):
+
         start_time = datetime.now()
 
-        # Initialize Session & Plugin Registry
-        session = create_session()
-        s3_client = session.client("s3")
-        registry = PluginRegistry()
-        load_all_plugins(registry)
+        try:
+            session = create_session()
 
-        buckets = list_buckets(s3_client) or []
-        bucket_count = len(buckets)
+            # Use the same ScanEngine as the CLI
+            engine = ScanEngine(session=session)
 
-        all_findings = []
-        context = {"session": session, "s3_client": s3_client}
+            findings, metadata = engine.run()
 
-        # Filter registered S3 plugins dynamically
-        s3_plugins = [
-            plugin
-            for plugin in registry._registry.values()
-            if "s3" in [s.lower() for s in plugin.supported_services]
-        ]
-
-        # Execute registered plugins against all discovered buckets
-        for plugin in s3_plugins:
-            try:
-                findings_list = plugin.execute(context)
-                for finding in findings_list:
-                    # Support both Finding objects and raw dicts
-                    if hasattr(finding, "to_dict"):
-                        all_findings.append(finding.to_dict())
-                    elif isinstance(finding, dict):
-                        all_findings.append(finding)
-            except Exception as e:
-                st.error(f"Error executing plugin {plugin.name}: {e}")
+        except Exception as e:
+            st.error(f"CloudGuard scan failed: {e}")
+            st.stop()
 
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
 
+
     st.success("Scan Completed!")
 
-    # Top Metric Cards
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Total Buckets Scanned", bucket_count)
-    col2.metric("Total Findings Detected", len(all_findings))
-    col3.metric("Scan Execution Time", f"{duration:.2f} seconds")
+    # Convert Findings
 
-    # Render Charts and Table Results
+    all_findings = []
+
+    for finding in findings:
+
+        if hasattr(finding, "to_dict"):
+            all_findings.append(finding.to_dict())
+
+        elif isinstance(finding, dict):
+            all_findings.append(finding)
+
+    # Metrics
+
+    resources_with_findings = len(
+        {
+            finding.get("resource")
+            for finding in all_findings
+            if finding.get("resource")
+        }
+    )
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric(
+        "Resources with Findings",
+        resources_with_findings,
+    )
+
+    col2.metric(
+        "Total Findings",
+        len(all_findings),
+    )
+
+    col3.metric(
+        "Scan Execution Time",
+        f"{duration:.2f} seconds",
+    )
+
+    # Findings
+
     if all_findings:
+
         df = pd.DataFrame(all_findings)
 
-        st.subheader("📊 Assessment Findings Distribution")
+        # Normalize Severity
 
-        # Determine best column for pie chart breakdown
-        status_column = None
-        for col in ["passed", "severity", "status", "check"]:
-            if col in df.columns:
-                status_column = col
-                break
+        severity_order = [
+            "CRITICAL",
+            "HIGH",
+            "MEDIUM",
+            "LOW",
+            "PASS",
+        ]
 
-        if status_column:
-            chart_col, data_col = st.columns([1, 2])
+        severity_values = []
 
-            with chart_col:
-                status_counts = df[status_column].value_counts()
+        for finding in all_findings:
 
-                fig, ax = plt.subplots(figsize=(4, 4))
-                ax.pie(
-                    status_counts,
-                    labels=[str(lbl) for lbl in status_counts.index],
-                    autopct="%1.1f%%",
-                    startangle=90,
-                    colors=["#ff4b4b", "#00c0f2", "#ffbd45", "#2e7d32"][
-                        : len(status_counts)
-                    ],
-                )
-                ax.axis("equal")
-                st.pyplot(fig)
+            passed = finding.get("passed", False)
 
-            with data_col:
-                st.dataframe(df, use_container_width=True)
-        else:
-            st.dataframe(df, use_container_width=True)
+            if passed:
+                severity_values.append("PASS")
+                continue
 
-        # JSON Export Download Option
-        st.subheader("📥 Export Assessment Data")
-        json_report = df.to_json(orient="records", indent=4)
+            severity = str(
+                finding.get("severity", "HIGH")
+            ).upper()
+
+            if severity not in severity_order:
+                severity = "HIGH"
+
+            severity_values.append(severity)
+
+
+        severity_counts = (
+            pd.Series(severity_values)
+            .value_counts()
+            .reindex(severity_order, fill_value=0)
+        )
+
+        # Severity Distribution
+
+        st.subheader("Security Severity Distribution")
+
+        chart_col, data_col = st.columns([1, 2])
+
+
+        with chart_col:
+
+            fig, ax = plt.subplots(figsize=(5, 5))
+
+            # Remove zero-count severities from the pie
+            visible_counts = severity_counts[
+                severity_counts > 0
+            ]
+
+            ax.pie(
+                visible_counts,
+                labels=list(visible_counts.index),
+                autopct="%1.1f%%",
+                startangle=90,
+            )
+
+            ax.axis("equal")
+
+            st.pyplot(fig)
+
+            plt.close(fig)
+        # Findings Table
+
+        with data_col:
+
+            st.dataframe(
+                df,
+                use_container_width=True,
+                hide_index=True,
+            )
+        # Severity Summary
+
+        st.subheader("🔎 Severity Summary")
+
+        summary_cols = st.columns(len(severity_order))
+
+        for column, severity in zip(
+            summary_cols,
+            severity_order,
+        ):
+
+            column.metric(
+                severity,
+                int(severity_counts[severity]),
+            )
+
+        # JSON Export
+        st.subheader("Export Assessment Data")
+
+        json_report = df.to_json(
+            orient="records",
+            indent=4,
+        )
 
         st.download_button(
             label="⬇ Download CloudGuard JSON Report",
             data=json_report,
-            file_name=f"cloudguard_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            file_name=(
+                f"cloudguard_report_"
+                f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            ),
             mime="application/json",
         )
+
+
     else:
+
         st.info(
-            "✨ No security vulnerabilities or findings were detected on your S3 buckets."
+            "No security vulnerabilities or findings were detected."
         )
