@@ -1,5 +1,6 @@
 from cloudguard.findings import Finding
 from plugin_manager import PluginInterface
+from cloudguard.compliance.cis_aws import cis_reference
 from cloudguard.constants import ADMIN_PORTS,DATABASE_PORTS,PUBLIC_WEB_PORTS ,PORTS
 class Plugin(PluginInterface):
     # --- METADATA PROPERTIES ---
@@ -62,7 +63,7 @@ class Plugin(PluginInterface):
                 is_public_ipv6_source='::/0'==cidripv6
                 
                 inbound_message=''
-                sevrity=""
+                compliance_refs = []
                 if not egress  and (is_public_ipv4_source  and not  ipv4_evaluated ) or (is_public_ipv6_source and  not ipv6_evaluated):
                     if is_public_ipv4_source and  not ipv4_evaluated:
                         ipv4_evaluated=True
@@ -92,6 +93,10 @@ class Plugin(PluginInterface):
                             if  admin_port is not None:
                                 inbound_message=f'ADMIN USAGE PROTOCOL FOUND\n{protocol} {admin_port}  '
                                 severity = "CRITICAL"
+                                
+                                if is_public_ipv4_source :
+                                    compliance_refs.append(
+                                        cis_reference("nacl_remote_admin_ipv4"))
                             elif db_port is not None:
                                 inbound_message=f'DATABASE USAGE PROTOCOL FOUND\n{protocol} {db_port}'
                                 severity = "HIGH"
@@ -112,7 +117,8 @@ class Plugin(PluginInterface):
                             1. [Restrict Ports]: Replace -1 (All) with required ports (e.g., TCP 443)
                             2. [Narrow CIDR]: Replace 0.0.0.0/0 with trusted IP ranges
                             3. Allow required ephemeral return-traffic ports in the appropriate direction
-                                while restricting the source/destination CIDRs as tightly as practical.'''.strip()
+                            while restricting the source/destination CIDRs as tightly as practical.'''.strip(),
+                            compliance=compliance_refs,
                         ))
                         break     
                 

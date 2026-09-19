@@ -2,6 +2,7 @@ from botocore.exceptions import ClientError
 from cloudguard.aws.s3_scanner import list_buckets
 from cloudguard.findings import Finding
 from plugin_manager import PluginInterface
+from cloudguard.compliance.cis_aws import cis_reference
 
 
 class Plugin(PluginInterface):
@@ -72,6 +73,7 @@ class Plugin(PluginInterface):
                     severity="HIGH",
                     issue="Public Access block is incomplete or disabled.",
                     recommendation="Enable all 4 Public Access Block settings.",
+                    compliance=[cis_reference("s3_public_access_block")]
                 )
 
             return Finding(
@@ -82,6 +84,7 @@ class Plugin(PluginInterface):
                 severity=None,
                 issue="Public access block settings are secure and complete.",
                 recommendation="No action required.",
+                compliance=[cis_reference("s3_public_access_block")]
             )
 
         except ClientError as e:
@@ -97,5 +100,6 @@ class Plugin(PluginInterface):
                     severity="HIGH",
                     issue="Public Access block configuration is entirely missing.",
                     recommendation="Deploy standard AWS Public Access Block controls.",
+                    compliance=[cis_reference("s3_public_access_block")]
                 )
             raise e

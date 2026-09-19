@@ -2,7 +2,7 @@ from plugin_manager import PluginInterface
 from cloudguard.findings import Finding
 from cloudguard.constants import PORTS, ADMIN_PORTS,DATABASE_PORTS,PUBLIC_WEB_PORTS
 from rich import print
-
+from cloudguard.compliance.cis_aws import cis_reference
 
 class Plugin(PluginInterface):
     # --- METADATA PROPERTIES ---
@@ -82,7 +82,11 @@ class Plugin(PluginInterface):
                             recommendation=""" 0.0.0.0/0->-1
                             -Delete it immediately—restrict traffic strictly to required ports (443/80)
                             -Lock down management access (SSH/RDP) to your VPN or private IPs
-                            -Terminate public traffic behind a load balancer""" ))
+                            -Terminate public traffic behind a load balancer""" ),
+                        
+                        
+                        )
+                            
 
                 if is_ipv6_public and (is_all_traffic):
 
@@ -120,6 +124,12 @@ class Plugin(PluginInterface):
                             -Restrict ingress strictly to your application tier's security group or internal -CIDR (port 3306/5432) with no public IP assigned
                             """))
                     elif port in ADMIN_PORTS:
+                        compliance_refs = []
+                        
+                        if is_ipv4_public:
+                            compliance_refs.append(cis_reference("sg_remote_admin_ipv4"))
+                        if is_ipv6_public:
+                            compliance_refs.append(cis_reference("sg_remote_admin_ipv6"))
                         findings.append(Finding(
                             check="Security Group Exposure",
                             category="VPC",
@@ -131,7 +141,8 @@ class Plugin(PluginInterface):
                             -Delete public access immediately to prevent automated brute-force
                             -Credential stuffing
                             -Zero-day exploits on your administrative interfaces.
-                            """,))
+                            """,compliance=compliance_refs
+                            ))
                     else:
                         # by default
                         pass_status=False

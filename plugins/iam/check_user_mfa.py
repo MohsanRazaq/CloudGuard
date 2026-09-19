@@ -1,3 +1,4 @@
+from cloudguard.compliance.cis_aws import cis_reference
 from datetime import datetime, timezone
 from botocore.exceptions import ClientError
 from plugin_manager import PluginInterface
@@ -82,8 +83,9 @@ class Plugin(PluginInterface):
                                 resource=resource_id,
                                 passed=False,
                                 severity="HIGH",
-                                issue=f"Active Access Key {key_id} has NEVER been used.",
-                                recommendation="Deactivate or delete unused IAM access keys to reduce attack surface."
+                                issue=f"Active Access Key {key_id} has NEVER been used",
+                                recommendation="Deactivate or delete unused IAM access keys to reduce attack surface",
+                                compliance=[cis_reference("iam_user_mfa")]
                             )
                         )
                     else:
@@ -96,8 +98,9 @@ class Plugin(PluginInterface):
                                     resource=resource_id,
                                     passed=False,
                                     severity="MEDIUM",
-                                    issue=f"Access key inactive for {days_unused} days (Threshold: 90 days).",
-                                    recommendation="Rotate or disable stale credentials."
+                                    issue=f"Access key inactive for {days_unused} days (Threshold: 90 days)",
+                                    recommendation="Rotate or disable stale credentials",
+                                    compliance=[cis_reference("iam_user_mfa")]
                                 )
                             )
                         else:
@@ -108,8 +111,9 @@ class Plugin(PluginInterface):
                                     resource=resource_id,
                                     passed=True,
                                     severity=None,
-                                    issue=f"Key active and used recently ({days_unused} days ago).",
-                                    recommendation="No action required."
+                                    issue=f"Key active and used recently ({days_unused} days ago)",
+                                    recommendation="No action required",
+                                    compliance=[cis_reference("iam_user_mfa")]
                                 )
                             )
 
@@ -122,7 +126,8 @@ class Plugin(PluginInterface):
                     passed=False,
                     severity="HIGH",
                     issue=f"Failed to scan IAM access keys: {str(e)}",
-                    recommendation="Verify iam:ListUsers and iam:GetAccessKeyLastUsed permissions."
+                    recommendation="Verify iam:ListUsers and iam:GetAccessKeyLastUsed permissions",
+                    compliance=[cis_reference("iam_user_mfa")]
                 )
             )
 
@@ -144,7 +149,9 @@ class Plugin(PluginInterface):
                     passed=False,
                     severity="HIGH",
                     issue=f"AWS API Error: {e.response['Error']['Message']}",
-                    recommendation="Grant 'iam:ListUsers' permission to the CloudGuard IAM user."
+                    recommendation="Grant 'iam:ListUsers' permission to the CloudGuard IAM user",
+                    compliance=[cis_reference("iam_user_mfa")]
+                    
                 )
             ]
 
@@ -163,8 +170,9 @@ class Plugin(PluginInterface):
                             resource=resource_id,
                             passed=True,
                             severity=None,
-                            issue="MFA is enabled and active.",
-                            recommendation="No action required."
+                            issue="MFA is enabled and active",
+                            recommendation="No action required",
+                            compliance=[cis_reference("iam_user_mfa")]
                         )
                     )
                 else:
@@ -175,8 +183,9 @@ class Plugin(PluginInterface):
                             resource=resource_id,
                             passed=False,
                             severity="HIGH",
-                            issue=f"MFA is not enabled for IAM user '{username}'.",
-                            recommendation="Enable MFA for this IAM user."
+                            issue=f"MFA is not enabled for IAM user '{username}'",
+                            recommendation="Enable MFA for this IAM user",
+                            compliance=[cis_reference("iam_user_mfa")]
                         )
                     )
 
@@ -189,7 +198,8 @@ class Plugin(PluginInterface):
                         passed=False,
                         severity="HIGH",
                         issue=f"Could not check MFA status: {e.response['Error']['Message']}",
-                        recommendation="Grant 'iam:ListMFADevices' permission."
+                        recommendation="Grant 'iam:ListMFADevices' permission",
+                        compliance=[cis_reference("iam_user_mfa")]
                     )
                 )
 
