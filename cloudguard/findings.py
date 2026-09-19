@@ -29,8 +29,13 @@ class Finding:
         passed: Optional[bool]=True, 
         issue: Optional[str] = "", 
         recommendation: str = "",
+        cis_control:Optional[str]="",
+        cis_title:Optional[str]="",
+        cis_benchmark:Optional[str]="CIS AWS Foundation",
+        cis_version:Optional[str]='7.0.0',
         severity: Optional[str] = "HIGH", 
-        category: Optional[str] = "GENERAL"
+        category: Optional[str] = "GENERAL",
+        compliance: Optional[List[Dict[str, Any]]] = None
     ):
         self.check = check
         self.resource = resource
@@ -43,10 +48,18 @@ class Finding:
         self.evidence=evidence or{}
         self.remediation=remediation
         self.recommendation = recommendation
+        self.cis_control=cis_control
+        self.cis_title=cis_title
+        self.cis_benchmark=cis_benchmark
+        self.cis_version=cis_version
+        self.compliance = compliance or []
         if risk_score is not None:
             self.risk_score=risk_score
         else:
             self.risk_score=RiskScorer.score(self)
+            
+    
+
 
     def __str__(self):
         if self.passed:
@@ -92,6 +105,7 @@ class Finding:
             "severity": self.severity if not self.passed else "None",
             "issue": self.issue if not self.passed else "Secure and compliant",
             "recommendation":self.recommendation if not self.passed else "No action required",
-            "remediation":self.remediation if not self.passed else ""
+            "remediation":self.remediation if not self.passed else "",
+            "compliance": self.compliance,
         
         }

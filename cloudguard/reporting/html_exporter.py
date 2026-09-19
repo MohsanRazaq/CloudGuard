@@ -29,6 +29,38 @@ def export_to_html(all_findings, running_tasks):
             "recommendation",
             "No action required"
         )
+        cis = f.get("cis", {})
+        cis_control = cis.get("control", "")
+        cis_title = cis.get("title", "")
+        cis_benchmark = cis.get("benchmark", "")
+        cis_version = cis.get("version", "")
+
+        cis_html = ""
+
+        if cis_control:
+            cis_html = f"""
+                <div style="
+                    margin-top: 10px;
+                    padding: 8px 10px;
+                    background: #f8fafc;
+                    border-left: 3px solid #6366f1;
+                    border-radius: 4px;
+                    font-size: 0.85em;
+                ">
+                    <strong style="color: #4338ca;">
+                        CIS {cis_control}
+                    </strong>
+                    {"<br><span style='color: #475569;'>" + cis_title + "</span>" if cis_title else ""}
+                    {
+                        "<br><span style='color: #64748b;'>" +
+                        cis_benchmark +
+                        (" " + cis_version if cis_version else "") +
+                        "</span>"
+                        if cis_benchmark
+                        else ""
+                    }
+                </div>
+            """
 
         # Preserve recommendation line breaks in HTML
         recommendation = str(recommendation).replace("\n", "<br>")
@@ -86,8 +118,9 @@ def export_to_html(all_findings, running_tasks):
                     color: #64748b;
                     font-size: 0.9em;
                 ">
-                    {issue}
+                {issue}
                 </span>
+                {cis_html}
             </td>
 
             <td style="
