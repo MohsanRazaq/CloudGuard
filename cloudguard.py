@@ -1,5 +1,4 @@
 import argparse
-import sys
 from datetime import datetime
 
 from cloudguard.aws.session import create_session
@@ -24,7 +23,9 @@ def handle_scan(args):
 
     # 1. Track start time for report summary metrics
     start_time = datetime.now()
-    session = create_session()
+    session = create_session(
+    endpoint_url=getattr(args, "endpoint", None)
+)
 
     # Load registry to support filtering flags
     registry = PluginRegistry()
@@ -125,6 +126,13 @@ Examples:
         type=str,
         metavar="<svc>",
         help="Filter scan by AWS service (e.g., s3, iam)",
+    )
+    scan_parser.add_argument(
+        "--endpoint",
+        type=str,
+        default=None,
+        help="AWS-compatible endpoint URL, e.g. LocalStack http://localhost:4566"
+        
     )
 
     # --- SUBCOMMAND GROUP: plugins ---
