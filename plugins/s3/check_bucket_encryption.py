@@ -53,7 +53,22 @@ class Plugin(PluginInterface):
 
     def check_bucket_encryption(self, bucket_name: str, s3_client):
         try:
-            s3_client.get_bucket_encryption(Bucket=bucket_name)
+            response = s3_client.get_bucket_encryption(Bucket=bucket_name)
+
+            rules = response.get("ServerSideEncryptionConfiguration", {}).get(
+                "Rules", []
+            )
+
+            if not rules:
+                return Finding(
+                    check="Bucket Encryption",
+                    category="S3",
+                    resource=bucket_name,
+                    passed=False,
+                    severity="HIGH",
+                    issue="Bucket Encryption Disabled",
+                    recommendation="Enable S3 Default Encryption (SSE-S3 or SSE-KMS).",
+                )
 
             return Finding(
                 check="Bucket Encryption",
@@ -78,7 +93,9 @@ class Plugin(PluginInterface):
                     issue="Bucket Encryption Disabled",
                     recommendation="Enable S3 Default Encryption (SSE-S3 or SSE-KMS).",
                 )
+
             elif error_code == "NoSuchBucket":
                 return None
+
             else:
                 raise
