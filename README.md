@@ -4,7 +4,7 @@
 
 ## Overview
 
-CloudGuard follows a plugin-based architecture where individual security checks are separated from the scan engine.
+CloudGuard follows a plugin-based architecture where individual security checks are separated from the scan engine including cis benchmarking  marching towards attack surface mapping with radius blast.
 
 ```mermaid
 flowchart TD
