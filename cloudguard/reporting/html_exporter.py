@@ -29,16 +29,21 @@ def export_to_html(all_findings, running_tasks):
             "recommendation",
             "No action required"
         )
-        cis = f.get("cis", {})
-        cis_control = cis.get("control", "")
-        cis_title = cis.get("title", "")
-        cis_benchmark = cis.get("benchmark", "")
-        cis_version = cis.get("version", "")
-
+        compliance = f.get("compliance", [])
         cis_html = ""
-
-        if cis_control:
-            cis_html = f"""
+        if compliance:
+            compliance_blocks=[]
+            
+            for control in compliance:
+                framework=control.get("framework",'')
+                version=control.get("version",'')
+                control_id=control.get('control_id','')
+                title=control.get('title','')
+                mapping=control.get('mapping','')
+                note=control.get('note','')
+                
+            
+                block = f"""
                 <div style="
                     margin-top: 10px;
                     padding: 8px 10px;
@@ -48,19 +53,36 @@ def export_to_html(all_findings, running_tasks):
                     font-size: 0.85em;
                 ">
                     <strong style="color: #4338ca;">
-                        CIS {cis_control}
+                        CIS {control_id}
                     </strong>
-                    {"<br><span style='color: #475569;'>" + cis_title + "</span>" if cis_title else ""}
+                    {"<br><span style='color: #475569;'>" + title + "</span>" if title else ""}
                     {
                         "<br><span style='color: #64748b;'>" +
-                        cis_benchmark +
-                        (" " + cis_version if cis_version else "") +
+                        framework +
+                        (" " + version if version else "") +
                         "</span>"
-                        if cis_benchmark
+                        if framework
+                        else ""
+                    }
+                    {
+                        "<br><span style='color: #64748b;'>Mapping: " +
+                        mapping +
+                        "</span>"
+                        if mapping
+                        else ""
+                    }
+                    {
+                        "<br><span style='color: #64748b;'>" +
+                        note +
+                        "</span>"
+                        if note
                         else ""
                     }
                 </div>
             """
+                compliance_blocks.append(block)
+            cis_html="".join(compliance_blocks)
+        
 
         # Preserve recommendation line breaks in HTML
         recommendation = str(recommendation).replace("\n", "<br>")
