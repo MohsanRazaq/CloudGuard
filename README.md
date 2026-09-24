@@ -87,6 +87,7 @@ Each plugin provides metadata such as:
 * Supported services
 * Default severity
 * Dependencies
+* Mapping to CIS Benchmark
 
 This allows CloudGuard to discover and execute security checks without modifying the core scan engine every time a plugin is added.
 
